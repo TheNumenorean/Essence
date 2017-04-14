@@ -15,6 +15,8 @@ import com.github.axet.vget.VGet;
  */
 public class EssenceRuntime implements Runnable {
 	
+	static final File OUT_FILE = new File("songs/current/next.mp3");
+	
 	static final String testvid = "https://www.youtube.com/watch?v=uE-1RPDqJAY&t=3s";
 
 	/**
@@ -28,16 +30,8 @@ public class EssenceRuntime implements Runnable {
 
 	@Override
 	public void run() {
-		try {
-			VGet get = new VGet(new URL(testvid), new File("."));
-			get.download();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
-
-	public File retrieveAndDownloadVideo()
 	
 	
 	

@@ -3,19 +3,26 @@
  */
 package net.thenumenorean.essence.media;
 
-import java.net.URL;
+import java.io.File;
 
 /**
  * @author Francesco
  *
  */
-public class InputFile {
+public class LocalVideo extends Video {
+
+	private File file;
 
 	/**
 	 * 
 	 */
-	public InputFile(URL url) {
-		// TODO Auto-generated constructor stub
+	public LocalVideo(File f) {
+		this.file = f;
+	}
+
+	@Override
+	protected File getRawVideo() {
+		return file;
 	}
 
 }
