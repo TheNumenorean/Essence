@@ -24,6 +24,7 @@ dependencies {
     compile 'com.google.guava:guava:21.0'
 
 	compile group: 'com.github.axet', name: 'vget', version: '1.2.6'
+	compile group: 'net.bramp.ffmpeg', name: 'ffmpeg', version: '0.6.1'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
