@@ -25,6 +25,7 @@ dependencies {
 
 	compile group: 'com.github.axet', name: 'vget', version: '1.2.6'
 	compile group: 'net.bramp.ffmpeg', name: 'ffmpeg', version: '0.6.1'
+  compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.4.2'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
@@ -32,4 +33,3 @@ dependencies {
 
 // Define the main class for the application
 mainClassName = 'net.thenumenorean.essence.EssenceRuntime'
-
