@@ -37,6 +37,7 @@ public class EssenceRuntime implements Runnable {
 		}
 	}
 
+	public File retrieveAndDownloadVideo()
 	
 	
 	
