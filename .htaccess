@@ -3,10 +3,3 @@ RewriteRule ^$ /web [L]
 
 Order Deny,Allow
 deny from all
-
-#<Files *>
-#    allow from all
-#</Files>
-
-
-# DirectoryIndex web/index.php
