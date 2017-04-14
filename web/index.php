@@ -55,6 +55,23 @@
 
 <p>Carly was here</p>
 
+<!-- BEGINS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+<script type="text/javascript" src="https://hosted.muses.org/mrp.js"></script>
+<script type="text/javascript">
+MRP.insert({
+'url':'http://essence.caltech.edu:8000/stream',
+'codec':'mp3',
+'volume':100,
+'autoplay':false,
+'buffering':0,
+'title':'Essence',
+'bgcolor':'#000000',
+'skin':'darkconsole',
+'width':190,
+'height':62
+});
+</script>
+<!-- ENDS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
 
 
 
