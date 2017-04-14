@@ -1,5 +1,7 @@
 #!/bin/sh
 
+if [ -f songs/current/next.mp3 ]; then
+  mv -f songs/current/next.mp3 songs/current/tmp.mp3
+fi
 
-echo "/var/www/html/essence/songs/out.mp3"
-
+echo "songs/current/tmp.mp3"
