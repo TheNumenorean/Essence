@@ -52,6 +52,7 @@ public class EssenceRuntime implements Runnable {
 	public EssenceRuntime() throws IOException {
 
 		stop = false;
+		LOG_DIR.mkdirs();
 		
 		log  = Logger.getLogger("EssenceRuntime");
 		log.addHandler(new FileHandler(LOG_DIR.getAbsolutePath() + "/EssenceRuntime.log"));
@@ -65,7 +66,6 @@ public class EssenceRuntime implements Runnable {
 		TRACK_DIR.mkdirs();
 		UPLOADS_DIR.mkdirs();
 
-		LOG_DIR.mkdirs();
 		File log = new File(LOG_DIR,
 				"ezstream-" + (new SimpleDateFormat("YYYY_MM_dd_HH-mm").format(Date.from(Instant.now()))) + ".log");
 		if (!log.exists()) {
