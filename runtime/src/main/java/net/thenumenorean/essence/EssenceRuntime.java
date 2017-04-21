@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 import net.thenumenorean.essence.media.AudioEncoder;
 
@@ -18,7 +20,7 @@ import net.thenumenorean.essence.media.AudioEncoder;
  *
  */
 public class EssenceRuntime implements Runnable {
-
+	
 	static final String FFMPEG_PATH = "/usr/bin/ffmpeg";
 	static final String FFPROBE_PATH = "/usr/bin/ffprobe";
 
@@ -32,6 +34,8 @@ public class EssenceRuntime implements Runnable {
 
 	static final String testvid = "https://www.youtube.com/watch?v=uE-1RPDqJAY&t=3s";
 
+	public static Logger log;
+	
 	private ProcessBuilder pb;
 	private Process ezstream;
 	AudioEncoder audioEncoder;
@@ -49,13 +53,13 @@ public class EssenceRuntime implements Runnable {
 
 		stop = false;
 		
+		log  = Logger.getLogger("EssenceRuntime");
+		log.addHandler(new FileHandler(LOG_DIR.getAbsolutePath() + "/EssenceRuntime.log"));
+		
+		
 		shutdownHook = new Thread(new Runnable() {
-
 			@Override
-			public void run() {
-				stop();
-			}
-
+			public void run() {stop();}
 		});
 
 		TRACK_DIR.mkdirs();
@@ -81,6 +85,7 @@ public class EssenceRuntime implements Runnable {
 
 	@Override
 	public void run() {
+		log.info("Starting EssenceRuntime");
 
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 
@@ -105,7 +110,7 @@ public class EssenceRuntime implements Runnable {
 				handleCommand(br.readLine());
 			} catch (InterruptedException e) {
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.severe(e.getMessage());
 			}
 		}
 		
@@ -113,7 +118,7 @@ public class EssenceRuntime implements Runnable {
 
 	private void handleCommand(String line) {
 		
-		System.out.println("Received command: " + line);
+		log.info("Received command: " + line);
 		
 		if(line.equals("stop"))
 			stop();
@@ -129,13 +134,13 @@ public class EssenceRuntime implements Runnable {
 
 		stop = true;
 
-		System.out.println("Killing ezstream...");
+		log.info("Killing ezstream...");
 		ezstream.destroy();
 
-		System.out.println("Killing UpNextPlacer...");
+		log.info("Killing UpNextPlacer...");
 		upNextPlacer.stopAndWait();
 
-		System.out.println("Killing TrackProcessor...");
+		log.info("Killing TrackProcessor...");
 		trackProcessor.stopAndWait();
 	}
 

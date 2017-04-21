@@ -27,14 +27,14 @@ class UpNextPlacer extends RepeatingRunnable {
 	@Override
 	public void runOnce() {
 		
-		System.out.print("Checking if new song needed...");
+		EssenceRuntime.log.info("Checking if new song needed...");
 
 		if (!EssenceRuntime.OUT_FILE.exists()) {
 
 			File next = this.essenceRuntime.getNextTrack();
 
 			if (next != null) {
-				System.out.print("yes, adding " + next.getName());
+				EssenceRuntime.log.info("adding " + next.getName() + " as next");
 				try {
 					Files.move(next, EssenceRuntime.OUT_FILE);
 				} catch (IOException e) {
@@ -43,8 +43,6 @@ class UpNextPlacer extends RepeatingRunnable {
 			}
 
 		}
-		
-		System.out.println();
 
 	}
 
