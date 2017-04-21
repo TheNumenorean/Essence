@@ -36,7 +36,8 @@ public abstract class RepeatingRunnable implements Runnable {
 	 */
 	public void stop() {
 		stop = true;
-		thr.interrupt();
+		if(thr != null)
+			thr.interrupt();
 	}
 
 	/**
