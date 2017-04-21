@@ -50,12 +50,38 @@
 
 
 
-<h1>Essence</h1>
-
-
-<p>Carly was here</p>
-
-<!-- BEGINS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+<div class="container-fluid">
+	
+  <div class="row">
+    <div class="col-md-8">
+    
+    <div class="jumbotron">
+    
+    	<h2>Add a song from the web:</h2>
+        
+    </div>
+        
+    <div class="jumbotron">
+        <h2>Add a song from your computer</h2>
+       <form action="upload/upload.php" method="post" enctype="multipart/form-data">
+       <input type="hidden" value="file" id="fileUpload" name="fileUpload"/>
+        <div class="form-group">
+          <label for="musicTitle">Song Title</label>
+          <input type="text" class="form-control" id="musicTitle" name="musicTitle" placeholder="Taking the Hobbbits to Isengard">
+        </div>
+        <div class="form-group">
+          <label for="musicFile">Music File</label>
+          <input type="file" name="musicFile" id="musicFile">
+          <p class="help-block">Can be most formats.</p>
+        </div>
+        <button type="submit" class="btn btn-success">Upload</button>
+      </form>
+	</div>
+    
+    </div>
+    <div class="col-md-4">
+    <h2>Player</h2>
+    <!-- BEGINS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
 <script type="text/javascript" src="https://hosted.muses.org/mrp.js"></script>
 <script type="text/javascript">
 MRP.insert({
@@ -72,6 +98,12 @@ MRP.insert({
 });
 </script>
 <!-- ENDS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+    </div>
+  </div>
+
+</div>
+
+
 
 
 
