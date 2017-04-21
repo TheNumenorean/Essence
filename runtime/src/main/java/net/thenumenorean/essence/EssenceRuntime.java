@@ -7,15 +7,14 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
-import com.google.common.io.Files;
-
-import net.thenumenorean.essence.utils.RepeatingRunnable;
-
 /**
  * @author Francesco
  *
  */
 public class EssenceRuntime implements Runnable {
+	
+	static final String STREAM_CONF = "ezstream.xml";
+	static final String EZSTREAM_LOG = "log/exstream.log";
 
 	static final File TRACK_DIR = new File("songs/");
 	static final File OUT_FILE = new File(TRACK_DIR, "current/next.mp3");
@@ -33,8 +32,20 @@ public class EssenceRuntime implements Runnable {
 	@Override
 	public void run() {
 		
-		Thread upNextPlacer = new Thread(new UpNextPlacer());
+		ProcessBuilder pb = new ProcessBuilder("ezstream -c " + STREAM_CONF);
+		pb.redirectErrorStream(true);
+		pb.redirectOutput(new File(EZSTREAM_LOG));
 		
+		Thread upNextPlacer = new Thread(new UpNextPlacer(this));
+		
+		try {
+			Process ezstream = pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+
 		upNextPlacer.start();
 	}
 
@@ -58,47 +69,6 @@ public class EssenceRuntime implements Runnable {
 		
 	}
 
-	private class UpNextPlacer extends RepeatingRunnable {
 
-		private static final int DEFAULT_WAIT = 10000;
-
-		public UpNextPlacer() {
-			this(DEFAULT_WAIT);
-		}
-
-		public UpNextPlacer(int wait) {
-			super(wait);
-		}
-
-		@Override
-		public void runOnce() {
-
-			if (!OUT_FILE.exists()) {
-
-				File next = EssenceRuntime.this.getNextTrack();
-
-				if (next != null) {
-					try {
-						Files.move(next, OUT_FILE);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-
-			}
-
-		}
-
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		EssenceRuntime rt = new EssenceRuntime();
-
-		rt.run();
-
-	}
 
 }
