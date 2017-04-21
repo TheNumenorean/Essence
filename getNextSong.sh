@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if [ -f songs/current/next.mp3 ]; then
-  mv -f songs/current/next.mp3 songs/current/tmp.mp3
+if [ -f tracks/current/next.mp3 ]; then
+  mv -f tracks/current/next.mp3 tracks/current/tmp.mp3
 fi
 
-echo "songs/current/tmp.mp3"
+echo "tracks/current/tmp.mp3"

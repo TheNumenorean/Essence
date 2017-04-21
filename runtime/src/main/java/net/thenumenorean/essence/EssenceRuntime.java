@@ -16,7 +16,7 @@ public class EssenceRuntime implements Runnable {
 	static final String STREAM_CONF = "ezstream.xml";
 	static final String EZSTREAM_LOG = "log/exstream.log";
 
-	static final File TRACK_DIR = new File("songs/");
+	static final File TRACK_DIR = new File("tracks/");
 	static final File OUT_FILE = new File(TRACK_DIR, "current/next.mp3");
 
 	static final String testvid = "https://www.youtube.com/watch?v=uE-1RPDqJAY&t=3s";
@@ -53,6 +53,12 @@ public class EssenceRuntime implements Runnable {
 
 	}
 
+	
+	
+	/**
+	 * Gets the next track that should be played
+	 * @return
+	 */
 	public File getNextTrack() {
 		// TODO make not random
 		
