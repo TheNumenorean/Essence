@@ -39,8 +39,8 @@ public class AudioEncoder {
 	
 	public void convert(File from, File to) {
 		
-		if(!from.isFile() || !to.isFile())
-			throw new IllegalArgumentException("Inputs must be files!");
+		//if(!from.isFile() || !to.isFile())
+		//	throw new IllegalArgumentException("Inputs must be files!");
 		
 		
 		FFmpegBuilder b= new FFmpegBuilder();

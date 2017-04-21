@@ -4,9 +4,13 @@
 package net.thenumenorean.essence;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Scanner;
+
+import net.thenumenorean.essence.media.AudioEncoder;
 
 /**
  * @author Francesco
@@ -14,8 +18,12 @@ import java.io.IOException;
  */
 public class EssenceRuntime implements Runnable {
 	
+	static final String FFMPEG_PATH = "/usr/bin/ffmpeg";
+	static final String FFPROBE_PATH = "/usr/bin/ffprobe";
+	
+	static final File LOG_DIR = new File("log/");
+	
 	static final String STREAM_CONF = "ezstream.xml";
-	static final String EZSTREAM_LOG = "log/exstream.log";
 
 	static final File TRACK_DIR = new File("tracks/");
 	static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
@@ -26,22 +34,41 @@ public class EssenceRuntime implements Runnable {
 	
 	
 	private ProcessBuilder pb;
-	private Thread upNextPlacer;
-	Process ezstream;
+	private Process ezstream;
+	AudioEncoder audioEncoder;
+	
+	private UpNextPlacer upNextPlacer;
+	private TrackProcessor trackProcessor;
+	private boolean stop;
 
 	/**
+	 * @throws IOException 
 	 * 
 	 */
-	public EssenceRuntime() {
-
-		TRACK_DIR.mkdir();
+	public EssenceRuntime() throws IOException {
 		
-		pb = new ProcessBuilder("ezstream -c " + STREAM_CONF);
+		stop = false;
+
+		TRACK_DIR.mkdirs();
+		UPLOADS_DIR.mkdirs();
+		
+		
+		LOG_DIR.mkdirs();
+		File log = new File(LOG_DIR, "ezstream-" + (new SimpleDateFormat("YYYY_MM_dd_HH-mm").format(Date.from(Instant.now()))) + ".log");
+		if(!log.exists()) {
+			log.createNewFile();
+		}
+		
+		pb = new ProcessBuilder("ezstream", "-c", STREAM_CONF);
 		pb.redirectErrorStream(true);
-		pb.redirectOutput(new File(EZSTREAM_LOG));
+		pb.redirectOutput(log);
+		pb.directory(null);
 		
 
-		upNextPlacer = new Thread(new UpNextPlacer(this));
+		upNextPlacer = new UpNextPlacer(this);
+		trackProcessor = new TrackProcessor(this);
+		
+		audioEncoder = new AudioEncoder(FFMPEG_PATH, FFPROBE_PATH);
 	}
 
 	@Override
@@ -56,17 +83,30 @@ public class EssenceRuntime implements Runnable {
 		}
 		
 
-		upNextPlacer.start();
+		new Thread(upNextPlacer).start();
+		new Thread(trackProcessor).start();
+		
+		Scanner scan = new Scanner(System.in);
+		while(!stop) {
+			if(scan.nextLine().equals("stop"))
+				stop();
+		}
+		scan.close();
 	}
 
-	private void findNewTracks() {
+	public void stop() {
 		
-		File[] uploads = UPLOADS_DIR.listFiles(new NoFolderFilter());
+		stop = true;
 		
-		
+		System.out.println("Killing ezstream...");
+		ezstream.destroy();
 
+		System.out.println("Killing UpNextPlacer...");
+		upNextPlacer.stopAndWait();
+
+		System.out.println("Killing TrackProcessor...");
+		trackProcessor.stopAndWait();
 	}
-
 	
 	
 	/**
@@ -79,15 +119,6 @@ public class EssenceRuntime implements Runnable {
 		File[] tracks = TRACK_DIR.listFiles(new NoFolderFilter());
 		
 		return tracks.length < 1 ? null : tracks[0];
-		
-	}
-	
-	private class NoFolderFilter implements FileFilter {
-
-		@Override
-		public boolean accept(File pathname) {
-			return pathname.isFile();
-		}
 		
 	}
 

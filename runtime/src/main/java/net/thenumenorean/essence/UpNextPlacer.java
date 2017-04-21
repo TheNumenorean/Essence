@@ -13,7 +13,7 @@ class UpNextPlacer extends RepeatingRunnable {
 	 * 
 	 */
 	private final EssenceRuntime essenceRuntime;
-	private static final int DEFAULT_WAIT = 10000;
+	private static final int DEFAULT_WAIT = 30000;
 
 	public UpNextPlacer(EssenceRuntime essenceRuntime) {
 		this(essenceRuntime, DEFAULT_WAIT);
@@ -26,12 +26,15 @@ class UpNextPlacer extends RepeatingRunnable {
 
 	@Override
 	public void runOnce() {
+		
+		System.out.print("Checking if new song needed...");
 
 		if (!EssenceRuntime.OUT_FILE.exists()) {
 
 			File next = this.essenceRuntime.getNextTrack();
 
 			if (next != null) {
+				System.out.print("yes, adding " + next.getName());
 				try {
 					Files.move(next, EssenceRuntime.OUT_FILE);
 				} catch (IOException e) {
@@ -40,6 +43,8 @@ class UpNextPlacer extends RepeatingRunnable {
 			}
 
 		}
+		
+		System.out.println();
 
 	}
 
