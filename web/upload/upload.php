@@ -4,10 +4,16 @@
 <?php
 
 if(isset($_POST["fileUpload"])) {
+	
 
 	$target_dir = "../../tracks/uploads/";
 	$fileType = pathinfo($_FILES["musicFile"]["name"],PATHINFO_EXTENSION);
-	$target_file = $target_dir . basename($_POST["musicTitle"]) . '.' . $fileType;
+	
+	$newName = basename($_POST["musicTitle"]);
+	if(empty($newName))
+		$newName = basename($_FILES["musicFile"]["name"]);
+		
+	$target_file = $target_dir . $newName . '.' . $fileType;
 
 
 
@@ -19,7 +25,7 @@ if(isset($_POST["fileUpload"])) {
 		exit("file exists");
 	}
 	// Check file size
-	if ($_FILES["musicFile"]["size"] > 50000000)
+	if ($_FILES["musicFile"]["size"] > 100000000)
 		exit("File too large");
 
 	if($_FILES["musicFile"]["error"] != 0)

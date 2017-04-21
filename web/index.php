@@ -61,9 +61,10 @@
         
     </div>
         
+        
     <div class="jumbotron">
         <h2>Add a song from your computer</h2>
-       <form action="upload/upload.php" method="post" enctype="multipart/form-data">
+       <form action="upload/upload.php" method="POST" enctype="multipart/form-data">
        <input type="hidden" value="file" id="fileUpload" name="fileUpload"/>
         <div class="form-group">
           <label for="musicTitle">Song Title</label>
@@ -75,7 +76,7 @@
           <p class="help-block">Can be most formats.</p>
         </div>
         <button type="submit" class="btn btn-success">Upload</button>
-      </form>
+       </form>
 	</div>
     
     </div>
