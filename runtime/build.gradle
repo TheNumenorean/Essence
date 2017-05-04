@@ -6,6 +6,10 @@
  * user guide available at https://docs.gradle.org/3.5/userguide/tutorial_java_projects.html
  */
 
+plugins {
+ id "com.github.johnrengelman.shadow" version "1.2.4"
+}
+
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -13,6 +17,8 @@ apply plugin: 'eclipse'
 
 // Apply the application plugin to add support for building an application
 apply plugin: 'application'
+
+
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -31,6 +37,14 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-// Define the main class for the application
-mainClassName = 'net.thenumenorean.essence.EssenceRuntime'
+archivesBaseName = 'EssenceRuntime'
 
+shadowJar {
+  destinationDir = file('../')
+  classifier = null
+  version = null
+}
+
+
+// Define the main class for the application
+mainClassName = 'net.thenumenorean.essence.EssenceRunner'

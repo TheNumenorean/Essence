@@ -1,1 +1,7 @@
 .gradle/
+
+log/
+tracks/
+
+EssenceRuntime.jar
+log.lck
