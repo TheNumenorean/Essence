@@ -62,9 +62,16 @@ public class TrackProcessor extends RepeatingRunnable {
 			if (currLoc == null || currLoc.isEmpty()) {
 				isWeb = true;
 				out = downloadVideo(doc.getString("webaddress"));
+				if(out == null) {
+					EssenceRuntime.log.severe("Couldnt get file from web!");
+					continue;
+				}
 			} else {
 				out = new File(currLoc);
 			}
+			
+			
+				
 
 			File to = new File(EssenceRuntime.TRACK_DIR,
 					out.getName().substring(0, out.getName().indexOf('.')) + ".mp3");
@@ -131,7 +138,7 @@ public class TrackProcessor extends RepeatingRunnable {
 
 			return res[0];
 
-		} catch (MalformedURLException e) {
+		} catch (Exception e) {
 			EssenceRuntime.log.severe("Error downloading video at " + url + ": " + e.getMessage());
 			e.printStackTrace();
 			return null;
