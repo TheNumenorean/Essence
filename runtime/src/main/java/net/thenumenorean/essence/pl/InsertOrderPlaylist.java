@@ -50,7 +50,8 @@ public class InsertOrderPlaylist extends PlaylistGenerator {
 					.append("timestamp", d.getInteger("timestamp")));
 		}
 		
-		md.getPlaylistColection().insertMany(docs);
+		if(!docs.isEmpty())
+			md.getPlaylistColection().insertMany(docs);
 	}
 
 }
