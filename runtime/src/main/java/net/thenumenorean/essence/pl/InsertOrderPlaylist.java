@@ -47,7 +47,7 @@ public class InsertOrderPlaylist extends PlaylistGenerator {
 					.append("track_id", d.getObjectId("song_id"))
 					.append("req_id", d.getObjectId("_id"))
 					.append("user", d.getString("user"))
-					.append("timestamp", d.getLong("timestamp")));
+					.append("timestamp", d.getInteger("timestamp")));
 		}
 		
 		md.getPlaylistColection().insertMany(docs);
