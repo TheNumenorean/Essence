@@ -13,6 +13,12 @@
 
 <title>Essence</title>
 
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.1/jquery.form.min.js" integrity="sha384-tIwI8+qJdZBtYYCKwRkjxBGQVZS3gGozr3CtI+5JF/oL1JmPEHzCEnIKbDbLTCer" crossorigin="anonymous"></script>
+<script src="queue.js"></script>
+
 
 </head>
 
@@ -28,7 +34,7 @@
         <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/player">Player</a>
+        <a class="nav-link" href="/queue">Queue</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/settings">Settings</a>
@@ -64,7 +70,7 @@
         
     <div class="jumbotron">
         <h2>Add a song from your computer</h2>
-       <form action="upload/upload.php" method="POST" enctype="multipart/form-data">
+       <form id="localUpload" method="post" action="upload/upload.php" enctype="multipart/form-data">
        <input type="hidden" value="file" id="fileUpload" name="fileUpload"/>
         <div class="form-group">
           <label for="musicTitle">Song Title</label>
@@ -75,11 +81,13 @@
           <input type="file" name="musicFile" id="musicFile">
           <p class="help-block">Can be most formats.</p>
         </div>
-        <button type="submit" class="btn btn-success">Upload</button>
+        <input type="submit" class="btn btn-success" value="Upload"/>
+        	<div class="alert" role="alert"></div>
        </form>
 	</div>
     
     </div>
+
     <div class="col-md-4">
     <h2>Player</h2>
     <!-- BEGINS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
@@ -99,18 +107,37 @@ MRP.insert({
 });
 </script>
 <!-- ENDS: AUTO-GENERATED MUSES RADIO PLAYER CODE -->
+
+
+    <div id="queueCont"></div>
     </div>
+    
   </div>
 
 </div>
 
 
+<script>
+$( document ).ready(function() {
+	loadQueue($('#queueCont'));
+  
+  $('#localUpload').ajaxForm({
+	  url: 'upload/upload.php',
+	  method: 'POST',
+	  success: function(dat, stat, j) {
+		  alert(dat);
+	  },
+	  error: function(j, stat, err) {
+		  alert(err);
+	  },
+	  clearForm: true
+  });
+});
+</script>
 
 
 
 
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
 </body>
 </html>
