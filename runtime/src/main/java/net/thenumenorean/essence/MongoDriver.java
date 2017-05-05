@@ -16,7 +16,7 @@ import com.mongodb.client.model.Filters;
  */
 public class MongoDriver {
 	
-	public static final String DB_NAME  = "Essence";
+	public static final String DB_NAME  = "essence";
 	
 	private MongoClient mongo;
 	private MongoDatabase mongodb;
