@@ -187,7 +187,7 @@ public class EssenceRuntime implements Runnable {
 
 		Document next = mongoDriver.getPlaylistColection().find(Filters.eq("rank", 0)).first();
 		if (next != null) {
-			Document nextTrack = mongoDriver.getTrack(next.getLong("track_id"));
+			Document nextTrack = mongoDriver.getTrack(next.getObjectId("track_id"));
 			return nextTrack.getString("location");
 		}
 

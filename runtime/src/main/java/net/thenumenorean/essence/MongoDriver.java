@@ -4,6 +4,7 @@
 package net.thenumenorean.essence;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -45,7 +46,7 @@ public class MongoDriver {
 		return trackscol;
 	}
 	
-	public Document getTrack(long id) {
+	public Document getTrack(ObjectId id) {
 		return trackscol.find(Filters.eq("_id", id)).first();
 	}
 
