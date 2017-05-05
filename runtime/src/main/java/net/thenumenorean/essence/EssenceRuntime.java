@@ -165,34 +165,36 @@ public class EssenceRuntime implements Runnable {
 	 * @return
 	 */
 	public String getNextTrack() {
-		
+
 		// Remove the just played songe from the playlist
 		Document justPlayed = mongoDriver.getPlaylistColection().findOneAndDelete(Filters.eq("rank", -1));
-		//TODO:add justPlayed to history
-		
+		// TODO:add justPlayed to history
+
 		// Update playlist for meantime accesses
 		// Move the up-next song (at rank 0) to playing (-1)
 		mongoDriver.getPlaylistColection().updateMany(Filters.exists("rank"), Updates.inc("rank", -1));
-		
-		
+
 		// Remove the track that is now playing from the requests collection
 		Document nowPlaying = mongoDriver.getPlaylistColection().find(Filters.eq("rank", -1)).first();
-		if(nowPlaying != null)
+		if (nowPlaying != null)
 			mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", nowPlaying.getObjectId("req_id")));
-		
-		
+
 		new InsertOrderPlaylist().regeneratePlaylist(mongoDriver);
-		
-		
 
 		Document next = mongoDriver.getPlaylistColection().find(Filters.eq("rank", 0)).first();
-		if (next != null) {
-			Document nextTrack = mongoDriver.getTrack(next.getObjectId("track_id"));
-			return nextTrack.getString("location");
+		if (next == null) {
+			log.warning("getNextTrack found no next track!");
+			return null;
 		}
 
-		return null;
+		Document nextTrack = mongoDriver.getTrack(next.getObjectId("track_id"));
 
+		if (nextTrack == null) {
+			log.severe("Couldnt find track with id " + next.getObjectId("track_id"));
+			return null;
+		}
+
+		return nextTrack.getString("location");
 	}
 
 }
