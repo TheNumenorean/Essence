@@ -85,7 +85,7 @@ public class EssenceRuntime implements Runnable {
 
 		// Create the EZStream process to get it ready to run
 		pb = new ProcessBuilder("ezstream", "-c", STREAM_CONF);
-		pb.redirectErrorStream(true);
+		pb.redirectError(log);
 		pb.redirectOutput(log);
 		pb.directory(null);
 
