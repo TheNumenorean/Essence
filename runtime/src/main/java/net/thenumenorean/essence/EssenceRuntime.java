@@ -15,14 +15,12 @@ import java.util.logging.Logger;
 
 import org.bson.Document;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
 import net.thenumenorean.essence.media.AudioEncoder;
 import net.thenumenorean.essence.media.TrackProcessor;
+import net.thenumenorean.essence.pl.InsertOrderPlaylist;
 
 /**
  * @author Francesco
@@ -167,14 +165,29 @@ public class EssenceRuntime implements Runnable {
 	 * @return
 	 */
 	public String getNextTrack() {
-		// TODO make not random
-
+		
+		// Remove the just played songe from the playlist
 		Document justPlayed = mongoDriver.getPlaylistColection().findOneAndDelete(Filters.eq("rank", -1));
+		//TODO:add justPlayed to history
+		
+		// Update playlist for meantime accesses
+		// Move the up-next song (at rank 0) to playing (-1)
 		mongoDriver.getPlaylistColection().updateMany(Filters.exists("rank"), Updates.inc("rank", -1));
+		
+		
+		// Remove the track that is now playing from the requests collection
+		Document nowPlaying = mongoDriver.getPlaylistColection().find(Filters.eq("rank", -1)).first();
+		if(nowPlaying != null)
+			mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", nowPlaying.getObjectId("req_id")));
+		
+		
+		new InsertOrderPlaylist().regeneratePlaylist(mongoDriver);
+		
+		
 
 		Document next = mongoDriver.getPlaylistColection().find(Filters.eq("rank", 0)).first();
 		if (next != null) {
-			Document nextTrack = mongoDriver.getTrack(next.getLong("trackid"));
+			Document nextTrack = mongoDriver.getTrack(next.getLong("track_id"));
 			return nextTrack.getString("location");
 		}
 

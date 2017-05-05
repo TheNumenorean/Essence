@@ -22,6 +22,7 @@ public class MongoDriver {
 	private MongoDatabase mongodb;
 	private MongoCollection<Document> playlistcol;
 	private MongoCollection<Document> trackscol;
+	private MongoCollection<Document> requestscol;
 
 	/**
 	 * 
@@ -33,6 +34,7 @@ public class MongoDriver {
 		mongodb = mongo.getDatabase(DB_NAME);
 		playlistcol = mongodb.getCollection("playlist");
 		trackscol = mongodb.getCollection("tracks");
+		requestscol = mongodb.getCollection("requests");
 	}
 	
 	public MongoCollection<Document> getPlaylistColection() {
@@ -45,6 +47,10 @@ public class MongoDriver {
 	
 	public Document getTrack(long id) {
 		return trackscol.find(Filters.eq("_id", id)).first();
+	}
+
+	public MongoCollection<Document> getRequestColection() {
+		return requestscol;
 	}
 
 }
