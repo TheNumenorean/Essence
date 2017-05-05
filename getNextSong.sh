@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ -f tracks/current/next.mp3 ]; then
-  mv -f tracks/current/next.mp3 tracks/current/tmp.mp3
+if [ -f tracks/next.txt ]; then
+  cat tracks/next.txt
 fi
 
-echo "tracks/current/tmp.mp3"
+> tracks/next.txt
+
