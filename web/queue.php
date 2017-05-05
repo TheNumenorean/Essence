@@ -6,21 +6,30 @@
 <div id="queueContainerLocal" class="container-fluid">
     
    <h2>Queue</h2>
-	<div class="list-group">
+	<ul class="list-group">
 	<?php
 	
 	require '/vendor/autoload.php';
 	try {
-		// get collection containing info
-		$coll = (new MongoDB\Client())->test->sample;
+		// get the current queue
+		$connection = new MongoDB\Client();
+		$music = $connection->essence->music;
+		$coll = $connection->essence->requests;
+		//$coll = $connection->essence->playlist;
 		// find the documents, return items in cursor
-		$cursor = $coll->find([], ['sort'=> ['_id' => -1],]);
-		
+		//$cursor = $coll->find([], ['sort'=> ['rank' => -1],]);
+		$cursor = $coll->find([]);		
+
 		// for each line, add a row
 		foreach ($cursor as $obj) {
-			echo '<div class="list-group-item">';
-			echo '<span class=glyphicon glyphicon-music><p>', $obj["name"], ', added ', (time() - $obj["_id"]), ' seconds ago', '</p></span>';
-			echo '</div>';
+			//if ($obj["rank"] == -1) {
+			//	echo '<li class="list-group-item list-group-item-success">';
+			//} else {
+				echo '<li class="list-group-item">';
+			//}
+			//echo '<p>', $obj["rank"], ' ', $obj["name"], '</p>';
+			echo '<p>', $music->findOne(['_id' => $obj["song_id"]])["title"], '</p>';
+			echo '</li>';
 		}
 	} catch (Exception $e) {
 		echo 'Uh-oh! Exception! ', $e->getMessage(), "\n";

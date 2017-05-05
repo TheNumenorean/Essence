@@ -63,7 +63,22 @@
     
     <div class="jumbotron">
     
-    	<h2>Add a song from the web:</h2>
+    	<h2>Add a song from the web</h2>
+	<form id="webUpload" method="post" action="upload/upload.php" enctype="multipart/form-data">
+	<input type="hidden" value="link" id="webUpload" name="webUpload"/>
+	 <div class="form-group">
+          <label for="musicTitle">Song Title</label>
+          <input type="text" class="form-control" id="musicTitle" name="musicTitle" placeholder="Ride of the Valkyries">
+        </div>
+
+        <div class="form-group">
+          <label for="webLink">Youtube Link</label>
+          <input type="text" class="form-control" id="webLink" name="webLink">
+        </div>
+        <input type="submit" class="btn btn-success" value="Submit"/>
+        <div class="alert" role="alert"></div>
+       </form>
+	
         
     </div>
         
@@ -82,7 +97,7 @@
           <p class="help-block">Can be most formats.</p>
         </div>
         <input type="submit" class="btn btn-success" value="Upload"/>
-        	<div class="alert" role="alert"></div>
+        <div class="alert" role="alert"></div>
        </form>
 	</div>
     
@@ -132,6 +147,20 @@ $( document ).ready(function() {
 	  },
 	  clearForm: true
   });
+
+     $('#webUpload').ajaxForm({
+	  url: 'upload/upload.php',
+	  method: 'POST',
+	  success: function(dat, stat, j) {
+		  alert(dat);
+	  },
+	  error: function(j, stat, err) {
+		  alert(err);
+	  },
+	  clearForm: true
+  });
+
+
 });
 </script>
 
