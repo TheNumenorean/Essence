@@ -68,7 +68,7 @@ public abstract class RepeatingRunnable implements Runnable {
 
 		while (!stop) {
 
-			runOnce();
+			loop();
 
 			try {
 				Thread.sleep(wait);
@@ -85,6 +85,6 @@ public abstract class RepeatingRunnable implements Runnable {
 	 * A method which will be called repeatedly until stop is called, pausing
 	 * the initialized time between each run.
 	 */
-	public abstract void runOnce();
+	public abstract void loop();
 
 }
