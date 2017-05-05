@@ -13,7 +13,11 @@ import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
+
 import net.thenumenorean.essence.media.AudioEncoder;
+import net.thenumenorean.essence.media.TrackProcessor;
 
 /**
  * @author Francesco
@@ -28,22 +32,24 @@ public class EssenceRuntime implements Runnable {
 
 	static final String STREAM_CONF = "ezstream.xml";
 
-	static final File TRACK_DIR = new File("tracks/");
-	static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
+	public static final File TRACK_DIR = new File("tracks/");
+	public static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
 	static final File OUT_FILE = new File(TRACK_DIR, "current/next.mp3");
-
-	static final String testvid = "https://www.youtube.com/watch?v=uE-1RPDqJAY&t=3s";
 
 	public static Logger log;
 	
 	private ProcessBuilder pb;
 	private Process ezstream;
-	AudioEncoder audioEncoder;
+	
+	public AudioEncoder audioEncoder;
 
 	private UpNextPlacer upNextPlacer;
 	private TrackProcessor trackProcessor;
 	private boolean stop;
 	private Thread shutdownHook;
+	
+	private MongoClient mongo;
+	public MongoDatabase mongodb;
 
 	/**
 	 * @throws IOException
@@ -76,11 +82,16 @@ public class EssenceRuntime implements Runnable {
 		pb.redirectErrorStream(true);
 		pb.redirectOutput(log);
 		pb.directory(null);
+		
 
-		upNextPlacer = new UpNextPlacer(this);
-		trackProcessor = new TrackProcessor(this);
+		mongo = new MongoClient();
+		mongodb = mongo.getDatabase("Essence");
 
 		audioEncoder = new AudioEncoder(FFMPEG_PATH, FFPROBE_PATH);
+
+		upNextPlacer = new UpNextPlacer(this);
+		trackProcessor = new TrackProcessor(mongodb.getCollection("tracks"), audioEncoder);
+		
 	}
 
 	@Override

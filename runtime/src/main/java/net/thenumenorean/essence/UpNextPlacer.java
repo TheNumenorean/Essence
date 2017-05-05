@@ -25,7 +25,7 @@ class UpNextPlacer extends RepeatingRunnable {
 	}
 
 	@Override
-	public void runOnce() {
+	public void loop() {
 		
 		EssenceRuntime.log.info("Checking if new song needed...");
 
