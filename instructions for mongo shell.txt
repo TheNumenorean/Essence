@@ -1,0 +1,22 @@
+# carly's note: go to correct directory. after logging in go to
+cd /var/www/html/essence
+
+# starting the mongo daemon, should only have to do on restart of the server (type into terminal)
+sudo mongod --fork --logpath /var/log/mongodb.log
+# this is terrible we shouldn't be using sudo -- we need to change the permissions on /data/db
+# this should be already running -- try to connect
+mongo
+# and then when it starts up. to find my greeting:
+db.test.find()
+
+# some notes on security
+# https://docs.mongodb.com/manual/administration/configuration/
+
+# how to do things in mongodb from the terminal (aka mongo shell)
+# https://docs.mongodb.com/v3.0/tutorial/getting-started-with-the-mongo-shell/
+
+
+# next steps:
+# get mongodb library for php installed
+# https://github.com/mongodb/mongo-php-library
+# do things with it (I can learn php just as quickly as I can learn javascript)

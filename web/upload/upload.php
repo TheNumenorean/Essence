@@ -5,19 +5,20 @@
 
 require '/vendor/autoload.php';
 
-if(isset($_POST["fileUpload"])) {
-	
-	// create connection to the database
-	$connection = new MongoDB\Client();
-	$collection = $connection->test->sample;
+// create connection to the database
+$connection = new MongoDB\Client();
+$music = $connection->essence->music;
+$requests = $connection->essence->requests;
 
+if(isset($_POST["fileUpload"])) {
 	$target_dir = "../../tracks/uploads/";
 	$fileType = pathinfo($_FILES["musicFile"]["name"],PATHINFO_EXTENSION);
 	
+	// get name of the song 	
 	$newName = basename($_POST["musicTitle"]);
 	if(empty($newName))
 		$newName = basename($_FILES["musicFile"]["name"]);
-		
+	
 	$target_file = $target_dir . $newName . '.' . $fileType;
 
 	$finfo = new finfo(FILEINFO_MIME_TYPE);
@@ -26,25 +27,41 @@ if(isset($_POST["fileUpload"])) {
 	}
 	
 	// Check if file already exists
-	if (file_exists($target_file)) {
+	if (file_exists($target_file))
 		exit("file exists");
-	}
 	
 	// Check file size
 	if ($_FILES["musicFile"]["size"] > 100000000)
 		exit("File too large");
 
+	// check if there's some other error
 	if($_FILES["musicFile"]["error"] != 0)
 		echo "error " . $_FILES["musicFile"]["error"];
 
-	// use current time (secs since unix epoch) as the unique id value:
-	if (! $collection->insertOne(["_id" => time(), "name" => $newName, "filetype" => $fileType, "target_file" => $target_file,]))
-		echo "failure to record in db";
+	// check for any errors in moving the file
+	if (! move_uploaded_file($_FILES["musicFile"]["tmp_name"], $target_file))
+		exit("Unable to move file");
 
-	if (move_uploaded_file($_FILES["musicFile"]["tmp_name"], $target_file)) {
-	   echo "Success";
-	} else {
-	   echo "Failed";
-	}
+	// allow a uniquely assigned object id
+	// attempt an insertion to the database
+	$dbResult = $music->insertOne(["processed" => false, "location" => $target_file, "title" => $newName, "format" => $fileType, "add_time" => time(), "users_req" => ['placeholder',],]);
+	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => "placeholder", "timestamp" => time(),]);
+	echo "Success";
+
+} elseif(isset($_POST["webUpload"])) {
+	// get name of the song
+	$link = $_POST["webLink"];
+	if(empty($link))
+		exit("No link provided!!!");
+	$newName = basename($_POST["musicTitle"]);
+	if(empty($newName))
+		$newName = basename($link);
+	
+	// allow a uniquely assigned object id
+	// attempt an insertion to the database
+	$dbResult = $music->insertOne(["processed" => false, "webaddress" => $link, "title" => $newName, "add_time" => time(), "users_req" => ['placeholder',],]);
+	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => "placeholder", "timestamp" => time()]);
+	echo "Success";
+
 }
 ?>
