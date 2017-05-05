@@ -59,7 +59,7 @@ public class TrackProcessor extends RepeatingRunnable {
 			String currLoc = doc.getString("location");
 			File out = null;
 			boolean isWeb = false;
-			if (currLoc != null || currLoc.isEmpty()) {
+			if (currLoc == null || currLoc.isEmpty()) {
 				isWeb = true;
 				out = downloadVideo(doc.getString("webaddress"));
 			} else {
