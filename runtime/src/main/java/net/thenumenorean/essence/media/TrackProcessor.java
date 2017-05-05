@@ -56,12 +56,14 @@ public class TrackProcessor extends RepeatingRunnable {
 	@Override
 	public void loop() {
 		for (Document doc : trackSource.find(Filters.eq("processed", false))) {
-			String addr = doc.getString("webaddress");
+			String currLoc = doc.getString("location");
 			File out = null;
 			boolean isWeb = false;
-			if (addr != null) {
+			if (currLoc == null || currLoc.isEmpty()) {
 				isWeb = true;
-				out = downloadVideo(addr);
+				out = downloadVideo(doc.getString("webaddress"));
+			} else {
+				out = new File(currLoc);
 			}
 
 			File to = new File(EssenceRuntime.TRACK_DIR,
