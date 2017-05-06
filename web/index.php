@@ -34,7 +34,7 @@
         <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/queue">Queue</a>
+        <a class="nav-link" href="/tracks">Tracks</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/settings">Settings</a>

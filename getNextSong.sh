@@ -1,8 +1,10 @@
 #!/bin/bash
 
-if [ -f tracks/next.txt ]; then
-  cat tracks/next.txt
-fi
+while [ ! -s tracks/next.txt ]; do
+sleep 1
+done
+
+cat tracks/next.txt
 
 > tracks/next.txt
 

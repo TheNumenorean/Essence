@@ -7,17 +7,20 @@ require '/vendor/autoload.php';
 
 // create connection to the database
 $connection = new MongoDB\Client();
-$music = $connection->essence->music;
+$music = $connection->essence->tracks;
 $requests = $connection->essence->requests;
 
+// get the user's username
+$username = $_SERVER['PHP_AUTH_USER'];
+
 if(isset($_POST["fileUpload"])) {
-	$target_dir = "../../tracks/uploads/";
+	$target_dir = "tracks/uploads/";
 	$fileType = pathinfo($_FILES["musicFile"]["name"],PATHINFO_EXTENSION);
 	
 	// get name of the song 	
-	$newName = basename($_POST["musicTitle"]);
+	$newName = $_POST["musicTitle"];
 	if(empty($newName))
-		$newName = basename($_FILES["musicFile"]["name"]);
+		$newName = pathinfo($_FILES["musicFile"]["name"],PATHINFO_FILENAME);
 	
 	$target_file = $target_dir . $newName . '.' . $fileType;
 
@@ -39,13 +42,13 @@ if(isset($_POST["fileUpload"])) {
 		echo "error " . $_FILES["musicFile"]["error"];
 
 	// check for any errors in moving the file
-	if (! move_uploaded_file($_FILES["musicFile"]["tmp_name"], $target_file))
+	if (! move_uploaded_file($_FILES["musicFile"]["tmp_name"], "../../" . $target_file))
 		exit("Unable to move file");
 
 	// allow a uniquely assigned object id
 	// attempt an insertion to the database
-	$dbResult = $music->insertOne(["processed" => false, "location" => $target_file, "title" => $newName, "format" => $fileType, "add_time" => time(), "users_req" => ['placeholder',],]);
-	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => "placeholder", "timestamp" => time(),]);
+	$dbResult = $music->insertOne(["processed" => false, "location" => $target_file, "title" => $newName, "format" => $fileType, "add_time" => time(), "users_req" => [$username,],]);
+	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time(),]);
 	echo "Success";
 
 } elseif(isset($_POST["webUpload"])) {
@@ -59,8 +62,8 @@ if(isset($_POST["fileUpload"])) {
 	
 	// allow a uniquely assigned object id
 	// attempt an insertion to the database
-	$dbResult = $music->insertOne(["processed" => false, "webaddress" => $link, "title" => $newName, "add_time" => time(), "users_req" => ['placeholder',],]);
-	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => "placeholder", "timestamp" => time()]);
+	$dbResult = $music->insertOne(["processed" => false, "webaddress" => $link, "title" => $newName, "add_time" => time(), "users_req" => [$username,],]);
+	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time()]);
 	echo "Success";
 
 }
