@@ -9,18 +9,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 import org.bson.Document;
 
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 
 import net.thenumenorean.essence.media.AudioEncoder;
 import net.thenumenorean.essence.media.TrackProcessor;
 import net.thenumenorean.essence.pl.InsertOrderPlaylist;
+import net.thenumenorean.essence.pl.PlaylistGenerator;
+import net.thenumenorean.essence.utils.RepeatingRunnable;
 
 /**
  * @author Francesco
@@ -38,6 +41,8 @@ public class EssenceRuntime implements Runnable {
 	public static final File TRACK_DIR = new File("tracks/");
 	public static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
 	static final File NEXT_FILE = new File(TRACK_DIR, "next.txt");
+	
+	static final int MAX_PLAYLIST_SIZE = 3;
 
 	public static Logger log;
 
@@ -46,8 +51,10 @@ public class EssenceRuntime implements Runnable {
 
 	public AudioEncoder audioEncoder;
 
-	private UpNextPlacer upNextPlacer;
+	private OnDeckTrackManager onDeckTrackManager;
 	private TrackProcessor trackProcessor;
+	private PlaylistGenRunner playlistGenRunner;
+	
 	private boolean stop;
 	private Thread shutdownHook;
 	private MongoDriver mongoDriver;
@@ -93,8 +100,9 @@ public class EssenceRuntime implements Runnable {
 
 		mongoDriver = new MongoDriver();
 
-		upNextPlacer = new UpNextPlacer(this, NEXT_FILE);
+		onDeckTrackManager = new OnDeckTrackManager(mongoDriver, NEXT_FILE);
 		trackProcessor = new TrackProcessor(mongoDriver.getTrackColection(), audioEncoder);
+		playlistGenRunner = new PlaylistGenRunner();
 
 	}
 
@@ -111,8 +119,9 @@ public class EssenceRuntime implements Runnable {
 			return;
 		}
 
-		new Thread(upNextPlacer).start();
+		new Thread(onDeckTrackManager).start();
 		new Thread(trackProcessor).start();
+		new Thread(playlistGenRunner).start();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (!stop) {
@@ -152,49 +161,72 @@ public class EssenceRuntime implements Runnable {
 		log.info("Killing ezstream...");
 		ezstream.destroy();
 
-		log.info("Killing UpNextPlacer...");
-		upNextPlacer.stopAndWait();
+		log.info("Killing onDeckTrackManager...");
+		onDeckTrackManager.stopAndWait();
 
 		log.info("Killing TrackProcessor...");
 		trackProcessor.stopAndWait();
+
+		log.info("Killing PlaylistGenRunner...");
+		playlistGenRunner.stopAndWait();
 	}
+	
+	private class PlaylistGenRunner extends RepeatingRunnable {
+		
+		private static final int DEFAULT_WAIT = 10000;
+		
+		private PlaylistGenerator pg;
 
-	/**
-	 * Gets the next track that should be played
-	 * 
-	 * @return
-	 */
-	public String getNextTrack() {
-
-		// Remove the just played songe from the playlist
-		Document justPlayed = mongoDriver.getPlaylistColection().findOneAndDelete(Filters.eq("rank", -1));
-		// TODO:add justPlayed to history
-
-		// Update playlist for meantime accesses
-		// Move the up-next song (at rank 0) to playing (-1)
-		mongoDriver.getPlaylistColection().updateMany(Filters.exists("rank"), Updates.inc("rank", -1));
-
-		// Remove the track that is now playing from the requests collection
-		Document nowPlaying = mongoDriver.getPlaylistColection().find(Filters.eq("rank", -1)).first();
-		if (nowPlaying != null)
-			mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", nowPlaying.getObjectId("req_id")));
-
-		new InsertOrderPlaylist().regeneratePlaylist(mongoDriver);
-
-		Document next = mongoDriver.getPlaylistColection().find(Filters.eq("rank", 0)).first();
-		if (next == null) {
-			log.warning("getNextTrack found no next track!");
-			return null;
+		public PlaylistGenRunner() {
+			this(DEFAULT_WAIT);
+		}
+		
+		public PlaylistGenRunner(int wait) {
+			super(wait);
+			pg = new InsertOrderPlaylist(mongoDriver);
 		}
 
-		Document nextTrack = mongoDriver.getTrack(next.getObjectId("track_id"));
+		@Override
+		public void loop() {
 
-		if (nextTrack == null) {
-			log.severe("Couldnt find track with id " + next.getObjectId("track_id"));
-			return null;
+
+
+			// Remove the track that is now playing from the requests collection
+			Document nowPlaying = mongoDriver.getPlaylistColection().find(Filters.eq("rank", -1)).first();
+			if (nowPlaying != null)
+				mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", nowPlaying.getObjectId("req_id")));
+
+			List<Document> docs = pg.generatePlaylist(mongoDriver.getPlaylistColection().find(), mongoDriver.getRequestColection().find());
+			
+			docs.sort(new Comparator<Document>() {
+
+				@Override
+				public int compare(Document arg0, Document arg1) {
+					return arg1.getInteger("rank") - arg0.getInteger("rank");
+				}
+				
+			});
+			
+			// Prevent changes to playlist in the middle of operations
+			synchronized(mongoDriver.getPlaylistColection()) {
+				
+				long remainingTracks = mongoDriver.getPlaylistColection().count();
+				
+				// Add only as many as gets us to the total allowed playlist size, since these are now set in stone.
+				for(int i = 0; i < docs.size() && i < MAX_PLAYLIST_SIZE - remainingTracks; i++) {
+					Document newTrack = docs.get(i);
+					newTrack.put("rank", remainingTracks - 1 + i); // Set the relevant rank relative to the prexisting playlist
+
+					mongoDriver.getPlaylistColection().insertOne(newTrack);
+					mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", newTrack.getObjectId("req_id")));
+				}
+				
+			}
+			
 		}
-
-		return nextTrack.getString("location");
+		
 	}
+
+
 
 }

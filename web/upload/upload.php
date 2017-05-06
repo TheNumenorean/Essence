@@ -47,8 +47,10 @@ if(isset($_POST["fileUpload"])) {
 
 	// allow a uniquely assigned object id
 	// attempt an insertion to the database
+
 	$dbResult = $music->insertOne(["processed" => false, "location" => $target_file, "title" => $newName, "format" => $fileType, "add_time" => time(), "users_req" => [$username,],]);
-	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time(),]);
+	$requests->insertOne(["track_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time(),]);
+
 	echo "Success";
 
 } elseif(isset($_POST["webUpload"])) {
@@ -63,7 +65,7 @@ if(isset($_POST["fileUpload"])) {
 	// allow a uniquely assigned object id
 	// attempt an insertion to the database
 	$dbResult = $music->insertOne(["processed" => false, "webaddress" => $link, "title" => $newName, "add_time" => time(), "users_req" => [$username,],]);
-	$requests->insertOne(["song_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time()]);
+	$requests->insertOne(["track_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time()]);
 	echo "Success";
 
 }
