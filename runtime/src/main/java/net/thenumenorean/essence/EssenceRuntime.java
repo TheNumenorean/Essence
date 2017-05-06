@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.logging.Logger;
 import org.bson.Document;
 
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 
 import net.thenumenorean.essence.media.AudioEncoder;
 import net.thenumenorean.essence.media.TrackProcessor;
@@ -196,8 +198,17 @@ public class EssenceRuntime implements Runnable {
 			if (nowPlaying != null)
 				mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", nowPlaying.getObjectId("req_id")));
 
-			List<Document> docs = pg.generatePlaylist(mongoDriver.getPlaylistColection().find(), mongoDriver.getRequestColection().find());
+			// Go through all the requests and only use ones that point to a track that has been processed
+			// Also sort the documents by timestamp low to high so that the are in order of oldest to newest
+			List<Document> requests = new ArrayList<>();
+			for(Document req : mongoDriver.getRequestColection().find().sort(Sorts.ascending("timestamp")))
+				if(mongoDriver.getTrack(req.getObjectId("track_id")).getBoolean("processed"))
+					requests.add(req);
 			
+			
+			List<Document> docs = pg.generatePlaylist(mongoDriver.getPlaylistColection().find().into(new ArrayList<>()), requests);
+			
+			// Sort the results by rank in order to ensure they are in the right order
 			docs.sort(new Comparator<Document>() {
 
 				@Override

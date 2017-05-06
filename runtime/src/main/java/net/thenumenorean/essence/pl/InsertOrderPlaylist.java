@@ -8,9 +8,6 @@ import java.util.List;
 
 import org.bson.Document;
 
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.model.Sorts;
-
 import net.thenumenorean.essence.EssenceRuntime;
 import net.thenumenorean.essence.MongoDriver;
 
@@ -26,11 +23,11 @@ public class InsertOrderPlaylist extends PlaylistGenerator {
 	}
 
 	@Override
-	public List<Document> generatePlaylist(FindIterable<Document> currentPlaylist, FindIterable<Document> requests) {
+	public List<Document> generatePlaylist(List<Document> currentPlaylist, List<Document> requests) {
 		List<Document> docs = new ArrayList<Document>();
 
 		int rank = 0;
-		for (Document d : requests.sort(Sorts.ascending("timestamp"))) {
+		for (Document d : requests) {
 
 			Document trck = md.getTrack(d.getObjectId("song_id"));
 			if (trck == null) {

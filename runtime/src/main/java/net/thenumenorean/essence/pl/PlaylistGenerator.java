@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.bson.Document;
 
-import com.mongodb.client.FindIterable;
-
 import net.thenumenorean.essence.MongoDriver;
 
 /**
@@ -26,6 +24,6 @@ public abstract class PlaylistGenerator {
 		this.md = md;
 	}
 	
-	public abstract List<Document> generatePlaylist(final FindIterable<Document> currentPlaylist,  FindIterable<Document> requests);
+	public abstract List<Document> generatePlaylist(final List<Document> currentPlaylist, List<Document> requests);
 
 }
