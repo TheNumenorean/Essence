@@ -29,7 +29,7 @@ public class InsertOrderPlaylist extends PlaylistGenerator {
 		int rank = 0;
 		for (Document d : requests) {
 
-			Document trck = md.getTrack(d.getObjectId("song_id"));
+			Document trck = md.getTrack(d.getObjectId("track_id"));
 			if (trck == null) {
 				EssenceRuntime.log.severe("Request references nonexistent track!");
 				continue;
