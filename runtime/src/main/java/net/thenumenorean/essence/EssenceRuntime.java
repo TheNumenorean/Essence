@@ -191,7 +191,7 @@ public class EssenceRuntime implements Runnable {
 		@Override
 		public void loop() {
 
-
+			log.info("Running playlist generation");
 
 			// Remove the track that is now playing from the requests collection
 			Document nowPlaying = mongoDriver.getPlaylistColection().find(Filters.eq("rank", -1)).first();
