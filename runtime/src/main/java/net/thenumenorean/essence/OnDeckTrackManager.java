@@ -34,9 +34,9 @@ class OnDeckTrackManager extends RepeatingRunnable {
 	@Override
 	public void loop() {
 
-		EssenceRuntime.log.info("Checking if new song needed...");
-
 		if (nextOutput.length() == 0) {
+
+			EssenceRuntime.log.info("New song needed...");
 
 			String next = getNextTrack();
 

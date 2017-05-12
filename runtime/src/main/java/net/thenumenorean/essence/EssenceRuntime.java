@@ -191,7 +191,7 @@ public class EssenceRuntime implements Runnable {
 		@Override
 		public void loop() {
 
-			log.info("Running playlist generation");
+			
 
 			// Go through all the requests and only use ones that point to a track that has been processed
 			// Also sort the documents by timestamp low to high so that the are in order of oldest to newest
@@ -200,6 +200,10 @@ public class EssenceRuntime implements Runnable {
 				if(mongoDriver.getTrack(req.getObjectId("track_id")).getBoolean("processed"))
 					requests.add(req);
 			
+			if(requests.isEmpty())
+				return;
+			
+			log.info("Running playlist generation on " + requests.size() + " tracks");
 			
 			List<Document> docs = pg.generatePlaylist(mongoDriver.getPlaylistColection().find().into(new ArrayList<>()), requests);
 			
