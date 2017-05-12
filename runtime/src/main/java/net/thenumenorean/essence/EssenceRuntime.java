@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import org.bson.Document;
 
+import com.gmail.kunicins.olegs.libshout.Libshout;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 
