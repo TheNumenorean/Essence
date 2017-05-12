@@ -8,6 +8,7 @@ public class Libshout implements AutoCloseable {
 			System.load("libs/libshout-java.so");
 		} catch (UnsatisfiedLinkError e) {
 			System.err.println("Libshout couldnt be loaded");
+			e.printStackTrace();
 		}
 	}
 	private static final int SUCCESS = 0;
