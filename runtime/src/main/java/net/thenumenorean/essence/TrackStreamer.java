@@ -42,6 +42,10 @@ class TrackStreamer extends RepeatingRunnable {
 		icecast.setPassword("SpaceMining");
 		icecast.setMount("/stream");
 		icecast.setFormat(Libshout.FORMAT_MP3);
+		icecast.setName("Essence");
+		icecast.setDescription("Essence music stream");
+		icecast.setUrl("http://essence.caltech.edu:8000/stream");
+		icecast.setGenre("All");
 	}
 
 	@Override
