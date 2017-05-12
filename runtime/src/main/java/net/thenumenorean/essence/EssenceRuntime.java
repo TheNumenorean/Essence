@@ -193,11 +193,6 @@ public class EssenceRuntime implements Runnable {
 
 			log.info("Running playlist generation");
 
-			// Remove the track that is now playing from the requests collection
-			Document nowPlaying = mongoDriver.getPlaylistColection().find(Filters.eq("rank", -1)).first();
-			if (nowPlaying != null)
-				mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", nowPlaying.getObjectId("req_id")));
-
 			// Go through all the requests and only use ones that point to a track that has been processed
 			// Also sort the documents by timestamp low to high so that the are in order of oldest to newest
 			List<Document> requests = new ArrayList<>();
