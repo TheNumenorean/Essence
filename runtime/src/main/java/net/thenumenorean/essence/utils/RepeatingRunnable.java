@@ -7,7 +7,8 @@ package net.thenumenorean.essence.utils;
  * This class is a framework for classes which need to run repeatedly at
  * specific intervals until instructed to stop.
  * 
- * This is especially useful for programs which are doing many concurrent operations.
+ * This is especially useful for programs which are doing many concurrent
+ * operations.
  * 
  * @author Francesco Macagno
  *
@@ -36,7 +37,7 @@ public abstract class RepeatingRunnable implements Runnable {
 	 */
 	public void stop() {
 		stop = true;
-		if(thr != null)
+		if (thr != null)
 			thr.interrupt();
 	}
 
@@ -64,6 +65,8 @@ public abstract class RepeatingRunnable implements Runnable {
 	@Override
 	public void run() {
 
+		runBefore();
+
 		thr = Thread.currentThread();
 
 		while (!stop) {
@@ -79,6 +82,8 @@ public abstract class RepeatingRunnable implements Runnable {
 
 		thr = null;
 
+		runAfter();
+
 	}
 
 	/**
@@ -86,5 +91,19 @@ public abstract class RepeatingRunnable implements Runnable {
 	 * the initialized time between each run.
 	 */
 	public abstract void loop();
+
+	/**
+	 * A function which is run before the main loop for setup. Can be overridden
+	 * by subclasses.
+	 */
+	public void runBefore() {
+	}
+
+	/**
+	 * A function which is run after the main loop ends. Can be overridden by
+	 * subclasses.
+	 */
+	public void runAfter() {
+	}
 
 }
