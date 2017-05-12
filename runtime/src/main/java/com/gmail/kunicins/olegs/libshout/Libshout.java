@@ -5,7 +5,7 @@ import java.io.IOException;
 public class Libshout implements AutoCloseable {
 	static {
 		try {
-			System.load(System.getProperty("user.dir") + "/libs/libshout-java.64.so");
+			System.load(System.getProperty("user.dir") + "/libs/libshout-java.so");
 		} catch (UnsatisfiedLinkError e) {
 			System.err.println("Libshout couldnt be loaded");
 			e.printStackTrace();
