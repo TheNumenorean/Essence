@@ -38,7 +38,7 @@ class TrackStreamer extends RepeatingRunnable {
 		icecast = new Libshout();
 		icecast.setHost("localhost");
 		icecast.setPort(8000);
-		icecast.setProtocol(Libshout.PROTOCOL_ICY);
+		icecast.setProtocol(Libshout.PROTOCOL_HTTP);
 		icecast.setPassword("SpaceMining");
 		icecast.setMount("/stream");
 		icecast.setFormat(Libshout.FORMAT_MP3);
@@ -50,6 +50,7 @@ class TrackStreamer extends RepeatingRunnable {
 			icecast.open();
 		} catch (IOException e) {
 			e.printStackTrace();
+			super.stop();
 		}
 	}
 
@@ -109,7 +110,6 @@ class TrackStreamer extends RepeatingRunnable {
 
 		Document next = mongoDriver.getPlaylistColection().find(Filters.eq("rank", 0)).first();
 		if (next == null) {
-			EssenceRuntime.log.warning("getNextTrack found no next track!");
 			return null;
 		}
 
