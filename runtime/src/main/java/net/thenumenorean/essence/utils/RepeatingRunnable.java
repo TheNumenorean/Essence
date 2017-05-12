@@ -15,7 +15,7 @@ package net.thenumenorean.essence.utils;
  */
 public abstract class RepeatingRunnable implements Runnable {
 
-	private boolean stop;
+	private boolean stopped;
 	private int wait;
 	private Thread thr;
 
@@ -27,7 +27,7 @@ public abstract class RepeatingRunnable implements Runnable {
 	 *            The time (in ms) to wait.
 	 */
 	public RepeatingRunnable(int wait) {
-		stop = false;
+		stopped = false;
 		this.wait = wait;
 	}
 
@@ -36,7 +36,7 @@ public abstract class RepeatingRunnable implements Runnable {
 	 * currently running code will be allowed to finish.
 	 */
 	public void stop() {
-		stop = true;
+		stopped = true;
 		if (thr != null)
 			thr.interrupt();
 	}
@@ -52,6 +52,14 @@ public abstract class RepeatingRunnable implements Runnable {
 		} catch (Exception e) {
 		}
 	}
+	
+	/**
+	 * Get whether stopped has been called
+	 * @return
+	 */
+	protected boolean stoppedCalled() {
+		return stopped;
+	}
 
 	/**
 	 * Is this RepeatingRunnable still running
@@ -64,12 +72,15 @@ public abstract class RepeatingRunnable implements Runnable {
 
 	@Override
 	public void run() {
+		
+		//Set stopped to false so this can be re-run
+		stopped = false;
 
 		runBefore();
 
 		thr = Thread.currentThread();
 
-		while (!stop) {
+		while (!stopped) {
 
 			loop();
 
