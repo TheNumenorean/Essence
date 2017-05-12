@@ -23,7 +23,7 @@ class TrackStreamer extends RepeatingRunnable {
 	 */
 	private final MongoDriver mongoDriver;
 	private Libshout icecast;
-	private static final int DEFAULT_WAIT = 5000;
+	private static final int DEFAULT_WAIT = 2000;
 
 	private InputStream track;
 
@@ -67,7 +67,6 @@ class TrackStreamer extends RepeatingRunnable {
 	public void loop() {
 
 		if (track == null) {
-			EssenceRuntime.log.info("Getting new song...");
 
 			String next = getNextTrack();
 			if (next != null) {
@@ -77,10 +76,9 @@ class TrackStreamer extends RepeatingRunnable {
 				} catch (FileNotFoundException e) {
 					EssenceRuntime.log.info("Error reading file!");
 					e.printStackTrace();
-					track = null;
 				}
 			} else {
-				EssenceRuntime.log.info("No next track available");
+				EssenceRuntime.log.info("No next track available!");
 				return;
 			}
 		}
@@ -88,7 +86,7 @@ class TrackStreamer extends RepeatingRunnable {
 		try {
 			byte[] buffer = new byte[1024];
 			int read = track.read(buffer);
-			while (read > 0 && super.stoppedCalled()) {
+			while (read > 0 && !super.stoppedCalled()) {
 				icecast.send(buffer, read);
 				read = track.read(buffer);
 			}
