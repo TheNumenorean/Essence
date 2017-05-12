@@ -38,7 +38,7 @@ class TrackStreamer extends RepeatingRunnable {
 		icecast = new Libshout();
 		icecast.setHost("localhost");
 		icecast.setPort(8000);
-		icecast.setProtocol(Libshout.PROTOCOL_HTTP);
+		icecast.setProtocol(Libshout.PROTOCOL_ICY);
 		icecast.setPassword("SpaceMining");
 		icecast.setMount("/stream");
 		icecast.setFormat(Libshout.FORMAT_MP3);
