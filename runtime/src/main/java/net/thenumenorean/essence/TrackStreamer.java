@@ -50,12 +50,12 @@ class TrackStreamer extends RepeatingRunnable {
 
 	@Override
 	public void runBefore() {
-		try {
-			icecast.open();
-		} catch (IOException e) {
-			e.printStackTrace();
-			super.stop();
-		}
+//		try {
+//			icecast.open();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			super.stop();
+//		}
 	}
 
 	@Override
