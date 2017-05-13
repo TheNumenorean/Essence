@@ -39,21 +39,6 @@ class TrackStreamer extends RepeatingRunnable {
 	}
 
 	@Override
-	public void runBefore() {
-//		try {
-//			icecast.open();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			super.stop();
-//		}
-	}
-
-	@Override
-	public void runAfter() {
-		icecast.close();
-	}
-
-	@Override
 	public void loop() {
 
 		if (track == null) {
