@@ -35,17 +35,7 @@ class TrackStreamer extends RepeatingRunnable {
 		super(wait);
 		this.mongoDriver = mongoDriver;
 
-		icecast = new Libshout();
-		icecast.setHost("localhost");
-		icecast.setPort(8000);
-		icecast.setProtocol(Libshout.PROTOCOL_HTTP);
-		icecast.setPassword("SpaceMining");
-		icecast.setMount("/stream");
-		icecast.setFormat(Libshout.FORMAT_MP3);
-		icecast.setName("Essence");
-		icecast.setDescription("Essence music stream");
-		icecast.setUrl("http://essence.caltech.edu:8000/stream");
-		icecast.setGenre("All");
+
 	}
 
 	@Override
@@ -84,8 +74,19 @@ class TrackStreamer extends RepeatingRunnable {
 		}
 
 		try {
-			if (!icecast.isConnected())
-				icecast.open();
+			icecast = new Libshout();
+			icecast.setHost("localhost");
+			icecast.setPort(8000);
+			icecast.setProtocol(Libshout.PROTOCOL_HTTP);
+			icecast.setPassword("SpaceMining");
+			icecast.setMount("/stream");
+			icecast.setFormat(Libshout.FORMAT_MP3);
+			icecast.setName("Essence");
+			icecast.setDescription("Essence music stream");
+			icecast.setUrl("http://essence.caltech.edu:8000/stream");
+			icecast.setGenre("All");
+			icecast.open();
+			
 			byte[] buffer = new byte[1024];
 			int read = track.read(buffer);
 			while (read > 0 && !super.stoppedCalled()) {
@@ -97,11 +98,13 @@ class TrackStreamer extends RepeatingRunnable {
 		} finally {
 			try {
 				track.close();
-			} catch (IOException e) {
+				track = null;
+				icecast.close();
+				icecast = null;
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
-			track = null;
-			icecast.close();
 		}
 
 	}
