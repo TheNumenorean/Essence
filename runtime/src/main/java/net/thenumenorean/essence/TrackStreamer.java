@@ -84,6 +84,8 @@ class TrackStreamer extends RepeatingRunnable {
 		}
 
 		try {
+			if (!icecast.isConnected())
+				icecast.open();
 			byte[] buffer = new byte[1024];
 			int read = track.read(buffer);
 			while (read > 0 && !super.stoppedCalled()) {
@@ -97,7 +99,7 @@ class TrackStreamer extends RepeatingRunnable {
 				track.close();
 			} catch (IOException e) {
 			}
-			
+
 			track = null;
 		}
 
