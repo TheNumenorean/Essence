@@ -101,6 +101,7 @@ class TrackStreamer extends RepeatingRunnable {
 			}
 
 			track = null;
+			icecast.close();
 		}
 
 	}
