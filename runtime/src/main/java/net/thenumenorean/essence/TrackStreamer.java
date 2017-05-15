@@ -22,10 +22,9 @@ class TrackStreamer extends RepeatingRunnable {
 	 * 
 	 */
 	private final MongoDriver mongoDriver;
-	private Libshout icecast;
 	private static final int DEFAULT_WAIT = 2000;
-
-	private InputStream track;
+	
+	private IcecastStream iceStream;
 
 	public TrackStreamer(MongoDriver mongoDriver) throws IOException {
 		this(mongoDriver, DEFAULT_WAIT);
@@ -35,19 +34,31 @@ class TrackStreamer extends RepeatingRunnable {
 		super(wait);
 		this.mongoDriver = mongoDriver;
 
-
+		iceStream = new IcecastStream();
+	}
+	
+	@Override
+	public void runBefore() {
+		new Thread(iceStream).start();
+	}
+	
+	@Override
+	public void runAfter() {
+		iceStream.stopAndWait();
 	}
 
 	@Override
 	public void loop() {
+		
+		
 
-		if (track == null) {
+		if (iceStream.track == null) {
 
 			String next = getNextTrack();
 			if (next != null) {
 				EssenceRuntime.log.info("Found next track at " + Files.getNameWithoutExtension(next));
 				try {
-					track = new BufferedInputStream(new FileInputStream(new File(next)));
+					iceStream.track = new BufferedInputStream(new FileInputStream(new File(next)));
 				} catch (FileNotFoundException e) {
 					EssenceRuntime.log.info("Error reading file!");
 					e.printStackTrace();
@@ -58,36 +69,81 @@ class TrackStreamer extends RepeatingRunnable {
 			}
 		}
 
-		try {
-			icecast = new Libshout();
-			icecast.setHost("localhost");
-			icecast.setPort(8000);
-			icecast.setProtocol(Libshout.PROTOCOL_HTTP);
-			icecast.setPassword("SpaceMining");
-			icecast.setMount("/stream");
-			icecast.setFormat(Libshout.FORMAT_MP3);
-			icecast.setName("Essence");
-			icecast.setDescription("Essence music stream");
-			icecast.setUrl("http://essence.caltech.edu:8000/stream");
-			icecast.setGenre("All");
-			icecast.open();
+	}
+
+	private class IcecastStream extends RepeatingRunnable {
+
+		private Libshout ice;
+
+		private byte[] silence, buffer;
+
+		public InputStream track;
+
+		public IcecastStream() throws IOException {
+			super(0);
+			track = null;
 			
-			byte[] buffer = new byte[1024];
-			int read = track.read(buffer);
-			while (read > 0 && !super.stoppedCalled()) {
-				icecast.send(buffer, read);
-				read = track.read(buffer);
+			ice = new Libshout();
+			ice.setHost("localhost");
+			ice.setPort(8000);
+			ice.setProtocol(Libshout.PROTOCOL_HTTP);
+			ice.setPassword("SpaceMining");
+			ice.setMount("/stream");
+			ice.setFormat(Libshout.FORMAT_MP3);
+			ice.setName("Essence");
+			ice.setDescription("Essence music stream");
+			ice.setUrl("http://essence.caltech.edu:8000/stream");
+			ice.setGenre("All");
+
+			silence = new byte[1024];
+			buffer = new byte[1024];
+
+			InputStream tmp = new BufferedInputStream(new FileInputStream(new File("silence.mp3")));
+			if (tmp.read(silence) < silence.length) {
+				tmp.close();
+				throw new IOException("silence file isnt large enough!");
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+			tmp.close();
+		}
+
+		@Override
+		public void runBefore() {
 			try {
-				track.close();
-				track = null;
-				icecast.close();
-				icecast = null;
-			} catch (Exception e) {
+				ice.open();
+			} catch (IOException e) {
+				EssenceRuntime.log.severe("Error connecting to icecast!");
 				e.printStackTrace();
+				
+				// Prevent the stream from continuing
+				stop(); 
+				TrackStreamer.this.stop();
+			}
+		}
+
+		@Override
+		public void runAfter() {
+			ice.close();
+		}
+
+		@Override
+		public void loop() {
+
+			try {
+				if (track == null) {
+					ice.send(silence, silence.length);
+				} else {
+
+					int read = track.read(buffer);
+					if (read > 0)
+						ice.send(buffer, read);
+					else {
+						track.close();
+						track = null;
+					}
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace(); // Dont fail, it may be temporary
 			}
 
 		}
