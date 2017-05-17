@@ -113,7 +113,7 @@ public class TrackProcessor extends RepeatingRunnable {
 						return false;
 					if (pathname.getName().endsWith(".webm"))
 						return true;
-					return false;
+					return true;
 				}
 
 			});
