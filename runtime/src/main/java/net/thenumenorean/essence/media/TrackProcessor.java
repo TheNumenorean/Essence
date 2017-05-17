@@ -31,7 +31,7 @@ import net.thenumenorean.essence.utils.RepeatingRunnable;
  */
 public class TrackProcessor extends RepeatingRunnable {
 
-	private static String DEFAULT_DOWNLOADS_DIR = "songs/downloads/";
+	private static String DEFAULT_DOWNLOADS_DIR = "tracks/tmp/";
 
 	private static final int DEFAULT_WAIT = 10000;
 	private final MongoCollection<Document> trackSource;
@@ -98,7 +98,7 @@ public class TrackProcessor extends RepeatingRunnable {
 		try {
 			// Make sure the destination exists
 			File tmp = new File(DEFAULT_DOWNLOADS_DIR + (new Random().nextInt()));
-			tmp.mkdir();
+			tmp.mkdirs();
 
 			// Get the actual files
 			VGet get = new VGet(new URL(url), tmp);
