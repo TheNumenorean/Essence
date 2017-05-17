@@ -75,9 +75,11 @@ class TrackStreamer extends RepeatingRunnable {
 
 		private Libshout ice;
 
-		private byte[] silence, buffer;
+		private byte[] buffer;
 
 		public InputStream track;
+		
+		private File silence;
 
 		public IcecastStream() throws IOException {
 			super(0);
@@ -95,15 +97,10 @@ class TrackStreamer extends RepeatingRunnable {
 			ice.setUrl("http://essence.caltech.edu:8000/stream");
 			ice.setGenre("All");
 
-			silence = new byte[1024];
 			buffer = new byte[1024];
 
-			InputStream tmp = new BufferedInputStream(new FileInputStream(new File("silence.mp3")));
-			if (tmp.read(silence) < silence.length) {
-				tmp.close();
-				throw new IOException("silence file isnt large enough!");
-			}
-			tmp.close();
+			silence = new File("silence.mp3");
+			
 		}
 
 		@Override
@@ -130,7 +127,15 @@ class TrackStreamer extends RepeatingRunnable {
 
 			try {
 				if (track == null) {
-					ice.send(silence, silence.length);
+					
+					InputStream tmp = new BufferedInputStream(new FileInputStream(silence));
+					int read = tmp.read(buffer);
+					while(read > 0) {
+						ice.send(buffer, read);
+						read = tmp.read(buffer);
+					}
+					tmp.close();
+					
 				} else {
 
 					int read = track.read(buffer);
