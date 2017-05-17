@@ -15,8 +15,10 @@
 		$connection = new MongoDB\Client();
 		$tracks = $connection->essence->tracks;
 		$playlist = $connection->essence->playlist;
+		//$queue = $connection->essence->requests;
 		// find the documents, return items in cursor
 		$cursor = $playlist->find([], ['sort'=> ['rank' => 1],]);
+		//$cursor = $queue->find([], ['sort'=> ['add_time' => -1],]);		
 
 		// for each line, add a row
 		foreach ($cursor as $obj) {
