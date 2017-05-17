@@ -162,9 +162,14 @@ public class EssenceRuntime implements Runnable {
 			// Go through all the requests and only use ones that point to a track that has been processed
 			// Also sort the documents by timestamp low to high so that the are in order of oldest to newest
 			List<Document> requests = new ArrayList<>();
-			for(Document req : mongoDriver.getRequestColection().find().sort(Sorts.ascending("timestamp")))
-				if(mongoDriver.getTrack(req.getObjectId("track_id")).getBoolean("processed"))
+			for(Document req : mongoDriver.getRequestColection().find().sort(Sorts.ascending("timestamp"))) {
+				Document tr = mongoDriver.getTrack(req.getObjectId("track_id"));
+				if(tr == null) {
+					EssenceRuntime.log.severe("Request refrences nonexistent track!");
+					continue;
+				} else if(tr.getBoolean("processed"))
 					requests.add(req);
+			}
 			
 			if(requests.isEmpty())
 				return;
