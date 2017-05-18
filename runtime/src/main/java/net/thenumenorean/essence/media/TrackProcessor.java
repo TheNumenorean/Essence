@@ -34,7 +34,7 @@ public class TrackProcessor extends RepeatingRunnable {
 
 	private static String DEFAULT_DOWNLOADS_DIR = "tracks/tmp/";
 
-	private static final int DEFAULT_WAIT = 10000;
+	private static final int DEFAULT_WAIT = 5000;
 	private final MongoCollection<Document> trackSource;
 	private AudioEncoder audioEncoder;
 
@@ -60,7 +60,7 @@ public class TrackProcessor extends RepeatingRunnable {
 		for (Document doc : trackSource.find(Filters.eq("processed", false))) {
 			String currLoc = doc.getString("location");
 
-			EssenceRuntime.log.info("Processing video " + doc.getString("name"));
+			EssenceRuntime.log.info("Processing video " + doc.getString("title"));
 
 			File result = null;
 			if (currLoc == null || currLoc.isEmpty()) { // Is a web video
