@@ -64,7 +64,7 @@ class TrackStreamer extends RepeatingRunnable {
 					e.printStackTrace();
 				}
 			} else {
-				EssenceRuntime.log.info("No next track available!");
+				//EssenceRuntime.log.info("No next track available!");
 				return;
 			}
 		}
