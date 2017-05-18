@@ -49,7 +49,7 @@ public class MongoDriver {
 		playlistcol = mongodb.getCollection("playlist");
 		trackscol = mongodb.getCollection("tracks");
 		requestscol = mongodb.getCollection("requests");
-		historycol = mongodb.getCollection("histoy");
+		historycol = mongodb.getCollection("history");
 	}
 	
 	/**
