@@ -111,8 +111,6 @@ public class TrackProcessor extends RepeatingRunnable {
 				public boolean accept(File pathname) {
 					if (pathname.isDirectory())
 						return false;
-					if (pathname.getName().endsWith(".webm"))
-						return true;
 					return true;
 				}
 
@@ -127,7 +125,12 @@ public class TrackProcessor extends RepeatingRunnable {
 
 				@Override
 				public int compare(File o1, File o2) {
-					// TODO: Sort by type so we take the most preferable
+					
+					// Sort by type so we take the most preferable
+					if(o1.getName().endsWith(".webm") && !o2.getName().endsWith(".webm")) {
+						return -1;
+					}
+					
 					return o1.getName().compareTo(o2.getName());
 				}
 
