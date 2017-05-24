@@ -80,6 +80,10 @@ class TrackStreamer extends RepeatingRunnable {
 			TrackStreamer.this.stop();
 			return;
 		}
+		
+
+		// We need a track to start with
+		new Thread(tFetch).start();
 
 	}
 
