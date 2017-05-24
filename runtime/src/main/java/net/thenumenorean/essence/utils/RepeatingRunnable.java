@@ -3,6 +3,8 @@
  */
 package net.thenumenorean.essence.utils;
 
+import net.thenumenorean.essence.EssenceRuntime;
+
 /**
  * This class is a framework for classes which need to run repeatedly at
  * specific intervals until instructed to stop.
@@ -28,6 +30,7 @@ public abstract class RepeatingRunnable implements Runnable {
 	 */
 	public RepeatingRunnable(int wait) {
 		stopped = false;
+		thr = null;
 		this.wait = wait;
 	}
 
@@ -48,8 +51,10 @@ public abstract class RepeatingRunnable implements Runnable {
 	public void stopAndWait() {
 		stop();
 		try {
-			thr.join();
-		} catch (Exception e) {
+			if(thr != null)
+				thr.join();
+		} catch (Exception e) { //Joining is mostly cleaning, and isnt strictly neccessary
+			EssenceRuntime.log.warning("Joining runnable failed" + e.getMessage());
 		}
 	}
 	
@@ -91,10 +96,9 @@ public abstract class RepeatingRunnable implements Runnable {
 
 		}
 
-		thr = null;
-
 		runAfter();
 
+		thr = null;
 	}
 
 	/**
