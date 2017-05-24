@@ -22,7 +22,9 @@ class TrackStreamer extends RepeatingRunnable {
 	 * 
 	 */
 	private final MongoDriver mongoDriver;
+	
 	private static final int DEFAULT_WAIT = 2000;
+	public static final String SILENCE_FILE = "dat/silence.mp3";
 	
 	private IcecastStream iceStream;
 
@@ -99,7 +101,7 @@ class TrackStreamer extends RepeatingRunnable {
 
 			buffer = new byte[1024];
 
-			silence = new File("silence.mp3");
+			silence = new File(SILENCE_FILE);
 			
 		}
 
