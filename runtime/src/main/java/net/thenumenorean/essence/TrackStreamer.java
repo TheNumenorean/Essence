@@ -102,8 +102,14 @@ class TrackStreamer extends RepeatingRunnable {
 		// Every loop, decide to either send silence or a track
 		try {
 			System.out.println(track);
-			sendFile(track == null ? silence : track);
-			if (track != null) { // A track was finished
+			
+			
+			
+			
+			if (track != null) {
+				
+				sendFile(track);
+				
 				track = null;
 
 				// Make sure the last one has fully finished before starting a
@@ -113,6 +119,8 @@ class TrackStreamer extends RepeatingRunnable {
 				// Get the next track
 				new Thread(tFetch).start();
 
+			} else {
+				sendFile(silence);
 			}
 
 		} catch (IOException e) {
