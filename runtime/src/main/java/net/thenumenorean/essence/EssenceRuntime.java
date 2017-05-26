@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -30,15 +31,11 @@ import net.thenumenorean.essence.utils.RepeatingRunnable;
  */
 public class EssenceRuntime implements Runnable {
 
-	static final String FFMPEG_PATH = "/usr/bin/ffmpeg";
-	static final String FFPROBE_PATH = "/usr/bin/ffprobe";
-
-	static final File LOG_DIR = new File("log/");
-
+	public static final File LOG_DIR = new File("log/");
 	public static final File TRACK_DIR = new File("tracks/");
 	public static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
 	
-	static final int MAX_PLAYLIST_SIZE = 3;
+	public static final int MAX_PLAYLIST_SIZE = 3;
 
 	public static Logger log;
 
@@ -47,16 +44,16 @@ public class EssenceRuntime implements Runnable {
 	private TrackStreamer trackStreamer;
 	private TrackProcessor trackProcessor;
 	private PlaylistGenRunner playlistGenRunner;
+	private MongoDriver mongoDriver;
 	
 	private boolean stop;
 	private Thread shutdownHook;
-	private MongoDriver mongoDriver;
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public EssenceRuntime() throws IOException {
+	public EssenceRuntime(Properties p) throws IOException {
 
 		stop = false;
 		LOG_DIR.mkdirs();
@@ -74,11 +71,11 @@ public class EssenceRuntime implements Runnable {
 		TRACK_DIR.mkdirs();
 		UPLOADS_DIR.mkdirs();
 
-		audioEncoder = new AudioEncoder(FFMPEG_PATH, FFPROBE_PATH);
+		audioEncoder = new AudioEncoder(p.getProperty("ffmpegPath"), p.getProperty("ffprobePath"));
 
-		mongoDriver = new MongoDriver();
+		mongoDriver = new MongoDriver(p.getProperty("mongoDBHost"), Integer.parseInt(p.getProperty("mongoDBPort")), p.getProperty("mongoDBName"));
 
-		trackStreamer = new TrackStreamer(mongoDriver);
+		trackStreamer = new TrackStreamer(mongoDriver, p);
 		trackProcessor = new TrackProcessor(mongoDriver.getTrackColection(), audioEncoder);
 		playlistGenRunner = new PlaylistGenRunner();
 
@@ -129,7 +126,7 @@ public class EssenceRuntime implements Runnable {
 
 		stop = true;
 
-		log.info("Killing onDeckTrackManager...");
+		log.info("Killing trackStreamer...");
 		trackStreamer.stopAndWait();
 
 		log.info("Killing TrackProcessor...");
@@ -141,7 +138,7 @@ public class EssenceRuntime implements Runnable {
 	
 	private class PlaylistGenRunner extends RepeatingRunnable {
 		
-		private static final int DEFAULT_WAIT = 10000;
+		private static final int DEFAULT_WAIT = 5000;
 		
 		private PlaylistGenerator pg;
 
