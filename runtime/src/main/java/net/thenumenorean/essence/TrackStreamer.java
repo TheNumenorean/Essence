@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 import org.bson.Document;
 
@@ -39,9 +40,10 @@ class TrackStreamer extends RepeatingRunnable {
 	 * Create a new TrackStreamer with the given mongodriver to get new tracks from.
 	 * The connection to icecast is not made until the thread is started.
 	 * @param mongoDriver The driver to retrieve data with
+	 * @param p 
 	 * @throws IOException
 	 */
-	public TrackStreamer(MongoDriver mongoDriver) throws IOException {
+	public TrackStreamer(MongoDriver mongoDriver, Properties p) throws IOException {
 
 		// We want basically no delay between tracks in order to keep the
 		// connection live
@@ -50,16 +52,16 @@ class TrackStreamer extends RepeatingRunnable {
 		track = null;
 
 		ice = new Libshout();
-		ice.setHost("localhost");
-		ice.setPort(8000);
+		ice.setHost(p.getProperty("icecastHost"));
+		ice.setPort(Integer.parseInt(p.getProperty("icecastPort")));
 		ice.setProtocol(Libshout.PROTOCOL_HTTP);
-		ice.setPassword("SpaceMining");
-		ice.setMount("/stream");
+		ice.setPassword(p.getProperty("icecastPasswd"));
+		ice.setMount(p.getProperty("icecastMount"));
 		ice.setFormat(Libshout.FORMAT_MP3);
-		ice.setName("Essence");
-		ice.setDescription("Essence music stream");
-		ice.setUrl("http://essence.caltech.edu:8000/stream");
-		ice.setGenre("All");
+		ice.setName(p.getProperty("icecastName"));
+		ice.setDescription(p.getProperty("icecastDesc"));
+		ice.setUrl(p.getProperty("icecastUrl"));
+		ice.setGenre(p.getProperty("icecastGenre"));
 
 		silence = new File(SILENCE_FILE);
 
