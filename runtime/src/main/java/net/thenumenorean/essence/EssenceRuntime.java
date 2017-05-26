@@ -134,6 +134,8 @@ public class EssenceRuntime implements Runnable {
 
 		log.info("Killing PlaylistGenRunner...");
 		playlistGenRunner.stopAndWait();
+		
+		mongoDriver.close();
 	}
 	
 	private class PlaylistGenRunner extends RepeatingRunnable {
