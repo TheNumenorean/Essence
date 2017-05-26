@@ -68,5 +68,17 @@ if(isset($_POST["fileUpload"])) {
 	$requests->insertOne(["track_id" => $dbResult->getInsertedId(), "user" => $username, "timestamp" => time()]);
 	echo "Success";
 
+} elseif (isset($_POST["trackRequest"])) {
+	// get id of the song
+	$id = $_POST["track_id"]; // this is a hexadecimal string
+	if(empty($id))
+		exit("No track selected! Something went wrong");
+	$track_id = new MongoDB\BSON\ObjectID($id);
+
+	//insert into the requests db
+	$dbResult = $requests->insertOne(["track_id" => $track_id, "user" => $username, "timestamp" => time()]);
+	echo "Success";
+} else {
+	exit("No option selected!");
 }
 ?>
