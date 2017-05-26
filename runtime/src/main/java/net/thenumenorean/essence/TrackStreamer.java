@@ -11,6 +11,7 @@ import org.bson.Document;
 
 import com.gmail.kunicins.olegs.libshout.Libshout;
 import com.google.common.io.Files;
+import com.mongodb.MongoInterruptedException;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
@@ -122,6 +123,8 @@ class TrackStreamer extends RepeatingRunnable {
 
 		} catch (IOException e) {
 			e.printStackTrace(); // Dont fail, it may be temporary
+		} catch(MongoInterruptedException e) {
+			EssenceRuntime.log.warning("Mongo connection was interrupted: " + e.getMessage());
 		}
 
 	}
