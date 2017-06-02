@@ -7,23 +7,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
-import org.bson.Document;
-
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
-
 import net.thenumenorean.essence.media.AudioEncoder;
 import net.thenumenorean.essence.media.TrackProcessor;
-import net.thenumenorean.essence.pl.InsertOrderPlaylist;
-import net.thenumenorean.essence.pl.PlaylistGenerator;
-import net.thenumenorean.essence.utils.RepeatingRunnable;
+import net.thenumenorean.essence.pl.PlaylistGeneratorService;
 
 /**
  * @author Francesco
@@ -43,7 +33,7 @@ public class EssenceRuntime implements Runnable {
 
 	private TrackStreamer trackStreamer;
 	private TrackProcessor trackProcessor;
-	private PlaylistGenRunner playlistGenRunner;
+	private PlaylistGeneratorService playlistGenRunner;
 	private MongoDriver mongoDriver;
 	
 	private boolean stop;
@@ -77,7 +67,7 @@ public class EssenceRuntime implements Runnable {
 
 		trackStreamer = new TrackStreamer(mongoDriver, p);
 		trackProcessor = new TrackProcessor(mongoDriver.getTrackColection(), audioEncoder);
-		playlistGenRunner = new PlaylistGenRunner();
+		playlistGenRunner = new PlaylistGeneratorService(mongoDriver);
 
 	}
 
@@ -136,75 +126,6 @@ public class EssenceRuntime implements Runnable {
 		playlistGenRunner.stopAndWait();
 		
 		mongoDriver.close();
-	}
-	
-	private class PlaylistGenRunner extends RepeatingRunnable {
-		
-		private static final int DEFAULT_WAIT = 5000;
-		
-		private PlaylistGenerator pg;
-
-		public PlaylistGenRunner() {
-			this(DEFAULT_WAIT);
-		}
-		
-		public PlaylistGenRunner(int wait) {
-			super(wait);
-			pg = new InsertOrderPlaylist(mongoDriver);
-		}
-
-		@Override
-		public void loop() {
-
-			
-
-			// Go through all the requests and only use ones that point to a track that has been processed
-			// Also sort the documents by timestamp low to high so that the are in order of oldest to newest
-			List<Document> requests = new ArrayList<>();
-			for(Document req : mongoDriver.getRequestColection().find().sort(Sorts.ascending("timestamp"))) {
-				Document tr = mongoDriver.getTrack(req.getObjectId("track_id"));
-				if(tr == null) {
-					EssenceRuntime.log.severe("Request refrences nonexistent track!");
-					continue;
-				} else if(tr.getBoolean("processed"))
-					requests.add(req);
-			}
-			
-			if(requests.isEmpty())
-				return;
-			
-			log.info("Running playlist generation on " + requests.size() + " tracks");
-			
-			List<Document> docs = pg.generatePlaylist(mongoDriver.getPlaylistColection().find().into(new ArrayList<>()), requests);
-			
-			// Sort the results by rank in order to ensure they are in the right order
-			docs.sort(new Comparator<Document>() {
-
-				@Override
-				public int compare(Document arg0, Document arg1) {
-					return arg1.getInteger("rank") - arg0.getInteger("rank");
-				}
-				
-			});
-			
-			// Prevent changes to playlist in the middle of operations
-			synchronized(mongoDriver.getPlaylistColection()) {
-				
-				long remainingTracks = mongoDriver.getPlaylistColection().count();
-				
-				// Add only as many as gets us to the total allowed playlist size, since these are now set in stone.
-				for(int i = 0; i < docs.size() && i < MAX_PLAYLIST_SIZE - remainingTracks; i++) {
-					Document newTrack = docs.get(i);
-					newTrack.put("rank", remainingTracks - 1 + i); // Set the relevant rank relative to the prexisting playlist
-
-					mongoDriver.getPlaylistColection().insertOne(newTrack);
-					mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", newTrack.getObjectId("req_id")));
-				}
-				
-			}
-			
-		}
-		
 	}
 
 
