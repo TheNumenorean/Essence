@@ -67,7 +67,7 @@ public class EssenceRuntime implements Runnable {
 
 		trackStreamer = new TrackStreamer(mongoDriver, p);
 		trackProcessor = new TrackProcessor(mongoDriver.getTrackColection(), audioEncoder);
-		playlistGenRunner = new PlaylistGeneratorService(mongoDriver);
+		playlistGenRunner = new PlaylistGeneratorService(mongoDriver, p.getProperty("playlistGenerator"));
 
 	}
 
@@ -122,7 +122,7 @@ public class EssenceRuntime implements Runnable {
 		log.info("Killing TrackProcessor...");
 		trackProcessor.stopAndWait();
 
-		log.info("Killing PlaylistGenRunner...");
+		log.info("Killing PlaylistGeneratorService...");
 		playlistGenRunner.stopAndWait();
 		
 		mongoDriver.close();

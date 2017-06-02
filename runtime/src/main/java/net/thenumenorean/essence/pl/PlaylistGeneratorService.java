@@ -15,20 +15,21 @@ import net.thenumenorean.essence.utils.RepeatingRunnable;
 
 public class PlaylistGeneratorService extends RepeatingRunnable {
 	
+	
 	private static final int DEFAULT_WAIT = 5000;
 	
 	private PlaylistGenerator pg;
 
 	private MongoDriver mongoDriver;
 
-	public PlaylistGeneratorService(MongoDriver mongoDriver) {
-		this(mongoDriver, DEFAULT_WAIT);
+	public PlaylistGeneratorService(MongoDriver mongoDriver, String generator) {
+		this(mongoDriver, generator, DEFAULT_WAIT);
 	}
 	
-	public PlaylistGeneratorService(MongoDriver mongoDriver, int wait) {
+	public PlaylistGeneratorService(MongoDriver mongoDriver, String generator, int wait) {
 		super(wait);
 		this.mongoDriver = mongoDriver;
-		pg = new InsertOrderPlaylist(mongoDriver);
+		loadGenerator(generator);
 	}
 
 	@Override
@@ -79,6 +80,16 @@ public class PlaylistGeneratorService extends RepeatingRunnable {
 				mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", newTrack.getObjectId("req_id")));
 			}
 			
+		}
+		
+	}
+	
+	void loadGenerator(String name) {
+		
+		if(name.equalsIgnoreCase("InsertOrder")) {
+			pg = new InsertOrderPlaylist(mongoDriver);
+		} else if(name.equalsIgnoreCase("Random")) {
+			pg = new RandomPlaylist(mongoDriver);
 		}
 		
 	}

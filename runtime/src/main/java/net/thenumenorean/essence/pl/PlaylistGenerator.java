@@ -25,5 +25,11 @@ public abstract class PlaylistGenerator {
 	}
 	
 	public abstract List<Document> generatePlaylist(final List<Document> currentPlaylist, List<Document> requests);
+	
+	protected Document createFromRequest(Document d, int rank) {
+		return new Document("rank", rank).append("track_id", d.getObjectId("track_id"))
+				.append("req_id", d.getObjectId("_id")).append("user", d.getString("user"))
+				.append("timestamp", d.getInteger("timestamp"));
+	}
 
 }
