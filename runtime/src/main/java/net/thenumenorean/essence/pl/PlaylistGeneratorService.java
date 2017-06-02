@@ -69,17 +69,28 @@ public class PlaylistGeneratorService extends RepeatingRunnable {
 		// Prevent changes to playlist in the middle of operations
 		synchronized(mongoDriver.getPlaylistColection()) {
 			
-			long remainingTracks = mongoDriver.getPlaylistColection().count();
+			mongoDriver.getPlaylistColection().deleteMany(Filters.eq("temporary", true));
 			
+			long remainingTracks = mongoDriver.getPlaylistColection().count();
+			int trackNum = 0;
 			// Add only as many as gets us to the total allowed playlist size, since these are now set in stone.
-			for(int i = 0; i < docs.size() && i < EssenceRuntime.MAX_PLAYLIST_SIZE - remainingTracks; i++) {
-				Document newTrack = docs.get(i);
-				newTrack.put("rank", remainingTracks - 1 + i); // Set the relevant rank relative to the prexisting playlist
+			for(; trackNum < docs.size(); trackNum++) {
+				Document newTrack = docs.get(trackNum);
+				newTrack.put("rank", remainingTracks - 1 + trackNum); // Set the relevant rank relative to the prexisting playlist
 
+				if(trackNum < EssenceRuntime.MAX_PLAYLIST_SIZE - remainingTracks) {
+					mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", newTrack.getObjectId("req_id")));
+				} else {
+					newTrack.put("temporary", true);
+				}
+				
 				mongoDriver.getPlaylistColection().insertOne(newTrack);
-				mongoDriver.getRequestColection().deleteOne(Filters.eq("_id", newTrack.getObjectId("req_id")));
 			}
 			
+			
+			for(; trackNum < docs.size(); trackNum++) {
+				
+			}
 		}
 		
 	}
