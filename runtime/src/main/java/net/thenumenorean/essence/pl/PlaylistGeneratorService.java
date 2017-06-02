@@ -1,5 +1,6 @@
 package net.thenumenorean.essence.pl;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,11 +23,11 @@ public class PlaylistGeneratorService extends RepeatingRunnable {
 
 	private MongoDriver mongoDriver;
 
-	public PlaylistGeneratorService(MongoDriver mongoDriver, String generator) {
+	public PlaylistGeneratorService(MongoDriver mongoDriver, String generator) throws FileNotFoundException {
 		this(mongoDriver, generator, DEFAULT_WAIT);
 	}
 	
-	public PlaylistGeneratorService(MongoDriver mongoDriver, String generator, int wait) {
+	public PlaylistGeneratorService(MongoDriver mongoDriver, String generator, int wait) throws FileNotFoundException {
 		super(wait);
 		this.mongoDriver = mongoDriver;
 		loadGenerator(generator);
@@ -95,12 +96,16 @@ public class PlaylistGeneratorService extends RepeatingRunnable {
 		
 	}
 	
-	void loadGenerator(String name) {
+	void loadGenerator(String name) throws FileNotFoundException {
 		
 		if(name.equalsIgnoreCase("InsertOrder")) {
 			pg = new InsertOrderPlaylist(mongoDriver);
 		} else if(name.equalsIgnoreCase("Random")) {
 			pg = new RandomPlaylist(mongoDriver);
+		} else {
+			
+			pg = new ExternalPlaylistGenerator(mongoDriver, name);
+
 		}
 		
 	}
