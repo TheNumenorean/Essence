@@ -27,21 +27,38 @@ import net.thenumenorean.essence.EssenceRuntime;
 import net.thenumenorean.essence.utils.RepeatingRunnable;
 
 /**
+ * This class processes uploads which it finds in Mongodb. The processing
+ * involves downloading the file, in the case of a web link, and converting the
+ * file to mp3.
+ * 
  * @author Francesco Macagno
  *
  */
 public class TrackProcessor extends RepeatingRunnable {
 
-	private static String DEFAULT_DOWNLOADS_DIR = "tracks/tmp/";
+	private static File DEFAULT_DOWNLOADS_DIR = new File(EssenceRuntime.TRACK_DIR, "tmp/");
 
 	private static final int DEFAULT_WAIT = 5000;
 	private final MongoCollection<Document> trackSource;
 	private AudioEncoder audioEncoder;
 
+	/**
+	 * Creates the TrackProcess with the default wait.
+	 * 
+	 * @param trackSource
+	 * @param audioEncoder
+	 */
 	public TrackProcessor(MongoCollection<Document> trackSource, AudioEncoder audioEncoder) {
 		this(trackSource, audioEncoder, DEFAULT_WAIT);
 	}
 
+	/**
+	 * Creates a TrackProcessor with the given traits.
+	 * 
+	 * @param trackSource The mongocollection to pull data from
+	 * @param audioEncoder The audioencoder to encode tracks with
+	 * @param wait How long to delay between each check
+	 */
 	public TrackProcessor(MongoCollection<Document> trackSource, AudioEncoder audioEncoder, int wait) {
 		super(wait);
 		this.trackSource = trackSource;
@@ -60,7 +77,7 @@ public class TrackProcessor extends RepeatingRunnable {
 		for (Document doc : trackSource.find(Filters.eq("processed", false))) {
 			String currLoc = doc.getString("location");
 
-			EssenceRuntime.log.info("Processing video " + doc.getString("title"));
+			EssenceRuntime.log.info("Processing track " + doc.getString("title"));
 
 			File result = null;
 			if (currLoc == null || currLoc.isEmpty()) { // Is a web video
@@ -112,7 +129,7 @@ public class TrackProcessor extends RepeatingRunnable {
 	private File getInternetTrack(String url) {
 
 		// Create a temporary folder to download files into
-		File tmp = new File(DEFAULT_DOWNLOADS_DIR + (new Random().nextInt()));
+		File tmp = new File(DEFAULT_DOWNLOADS_DIR, String.valueOf(new Random().nextInt()));
 		tmp.mkdirs();
 
 		// Download all available files

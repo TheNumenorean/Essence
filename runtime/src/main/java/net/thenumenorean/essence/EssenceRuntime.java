@@ -16,6 +16,10 @@ import net.thenumenorean.essence.media.TrackProcessor;
 import net.thenumenorean.essence.pl.PlaylistGeneratorService;
 
 /**
+ * This is the main class for the Essence runtime, which serves music, processes
+ * uploaded tracks, and calculates playlists using either local or external
+ * scripts.
+ * 
  * @author Francesco
  *
  */
@@ -25,7 +29,7 @@ public class EssenceRuntime implements Runnable {
 	public static final File LOG_DIR = new File("log/");
 	public static final File TRACK_DIR = new File("tracks/");
 	public static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
-	
+
 	// The number of tracs which are unchangeable
 	public static final int MAX_PLAYLIST_SIZE = 3;
 
@@ -34,15 +38,15 @@ public class EssenceRuntime implements Runnable {
 	// Helper classes
 	private AudioEncoder audioEncoder;
 	private MongoDriver mongoDriver;
-	
+
 	// Services
 	private TrackStreamer trackStreamer;
 	private TrackProcessor trackProcessor;
 	private PlaylistGeneratorService playlistGenRunner;
-	
+
 	// Keeps track of a stop command
 	private boolean stop;
-	
+
 	// Allow the program to stop gracefully on an externel influence
 	private Thread shutdownHook;
 
@@ -52,7 +56,8 @@ public class EssenceRuntime implements Runnable {
 	 * The runtime will not begin until run() is called.
 	 * 
 	 * 
-	 * @throws IOException If there are any errors initializing.
+	 * @throws IOException
+	 *             If there are any errors initializing.
 	 * 
 	 */
 	public EssenceRuntime(Properties p) throws IOException {
@@ -76,7 +81,8 @@ public class EssenceRuntime implements Runnable {
 
 		// Helper Classes
 		audioEncoder = new AudioEncoder(p.getProperty("ffmpegPath"), p.getProperty("ffprobePath"));
-		mongoDriver = new MongoDriver(p.getProperty("mongoDBHost"), Integer.parseInt(p.getProperty("mongoDBPort")), p.getProperty("mongoDBName"));
+		mongoDriver = new MongoDriver(p.getProperty("mongoDBHost"), Integer.parseInt(p.getProperty("mongoDBPort")),
+				p.getProperty("mongoDBName"));
 
 		// Services
 		trackStreamer = new TrackStreamer(mongoDriver, p);
@@ -121,7 +127,8 @@ public class EssenceRuntime implements Runnable {
 	 * Stop
 	 * 
 	 * 
-	 * @param line The command to analyze
+	 * @param line
+	 *            The command to analyze
 	 */
 	private void handleCommand(String line) {
 
@@ -152,10 +159,8 @@ public class EssenceRuntime implements Runnable {
 
 		log.info("Killing PlaylistGeneratorService...");
 		playlistGenRunner.stopAndWait();
-		
+
 		mongoDriver.close();
 	}
-
-
 
 }
