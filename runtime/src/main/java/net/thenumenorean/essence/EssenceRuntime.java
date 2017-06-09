@@ -21,26 +21,38 @@ import net.thenumenorean.essence.pl.PlaylistGeneratorService;
  */
 public class EssenceRuntime implements Runnable {
 
+	// Default folders
 	public static final File LOG_DIR = new File("log/");
 	public static final File TRACK_DIR = new File("tracks/");
 	public static final File UPLOADS_DIR = new File(TRACK_DIR, "uploads/");
 	
+	// The number of tracs which are unchangeable
 	public static final int MAX_PLAYLIST_SIZE = 3;
 
 	public static Logger log;
 
-	public AudioEncoder audioEncoder;
-
+	// Helper classes
+	private AudioEncoder audioEncoder;
+	private MongoDriver mongoDriver;
+	
+	// Services
 	private TrackStreamer trackStreamer;
 	private TrackProcessor trackProcessor;
 	private PlaylistGeneratorService playlistGenRunner;
-	private MongoDriver mongoDriver;
 	
+	// Keeps track of a stop command
 	private boolean stop;
+	
+	// Allow the program to stop gracefully on an externel influence
 	private Thread shutdownHook;
 
 	/**
-	 * @throws IOException
+	 * Creates a new EssenceRuntime using the given properties file.
+	 * 
+	 * The runtime will not begin until run() is called.
+	 * 
+	 * 
+	 * @throws IOException If there are any errors initializing.
 	 * 
 	 */
 	public EssenceRuntime(Properties p) throws IOException {
@@ -58,13 +70,15 @@ public class EssenceRuntime implements Runnable {
 			}
 		});
 
+		// Make sure these exists or the program will crash
 		TRACK_DIR.mkdirs();
 		UPLOADS_DIR.mkdirs();
 
+		// Helper Classes
 		audioEncoder = new AudioEncoder(p.getProperty("ffmpegPath"), p.getProperty("ffprobePath"));
-
 		mongoDriver = new MongoDriver(p.getProperty("mongoDBHost"), Integer.parseInt(p.getProperty("mongoDBPort")), p.getProperty("mongoDBName"));
 
+		// Services
 		trackStreamer = new TrackStreamer(mongoDriver, p);
 		trackProcessor = new TrackProcessor(mongoDriver.getTrackColection(), audioEncoder);
 		playlistGenRunner = new PlaylistGeneratorService(mongoDriver, p.getProperty("playlistGenerator"));
@@ -81,6 +95,7 @@ public class EssenceRuntime implements Runnable {
 		new Thread(trackProcessor).start();
 		new Thread(playlistGenRunner).start();
 
+		// Listen for commands
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		while (!stop) {
 
@@ -98,6 +113,16 @@ public class EssenceRuntime implements Runnable {
 
 	}
 
+	/**
+	 * Handle commands to the runtime.
+	 * 
+	 * Current commands:
+	 * 
+	 * Stop
+	 * 
+	 * 
+	 * @param line The command to analyze
+	 */
 	private void handleCommand(String line) {
 
 		log.info("Received command: " + line);
@@ -107,6 +132,9 @@ public class EssenceRuntime implements Runnable {
 
 	}
 
+	/**
+	 * Stops the runtime, gracefully killing all sub-processes
+	 */
 	public void stop() {
 
 		try {
